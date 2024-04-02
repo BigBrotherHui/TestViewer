@@ -1,0 +1,5 @@
+create_module(
+  PACKAGE_DEPENDS
+    PRIVATE VTK ITK
+)
+add_definitions(-DITK_IO_FACTORY_REGISTER_MANAGER)

@@ -1,0 +1,10 @@
+macro(include_all_directories)
+   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+    file(GLOB SUBDIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*)
+
+    foreach(subdir ${SUBDIRS})
+        if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${subdir})
+            include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${subdir})
+        endif()
+    endforeach()
+endmacro()
