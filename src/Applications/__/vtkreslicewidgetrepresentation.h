@@ -14,7 +14,7 @@ namespace asclepios::gui
 		vtkTypeMacro(vtkResliceWidgetRepresentation, vtkWidgetRepresentation);
 		vtkResliceWidgetRepresentation();
 		~vtkResliceWidgetRepresentation() = default;
-		
+		void reset();
 		void instantiateHandleRepresentation();
 		void StartWidgetInteraction(double eventPos[2]) override {};
 		void WidgetInteraction(double newEventPos[2]) override {};

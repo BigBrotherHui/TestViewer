@@ -253,6 +253,7 @@ void asclepios::gui::vtkResliceWidget::resetResliceCursor()
 				cursor->GetRepresentation());
 		if (rep)
 		{
+			rep->reset();
 			rep->getResliceActor()->reset();
 		}
 	}

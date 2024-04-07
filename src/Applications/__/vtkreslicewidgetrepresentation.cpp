@@ -172,8 +172,13 @@ void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double t_angle)
      m_cursorActor->getActorTranslate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
 }
 
+void asclepios::gui::vtkResliceWidgetRepresentation::reset(){
+	m_rotationAngle=0;
+}
+
 void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double y,double z, char moveAxes)
 {
+    std::cout << "**********" << m_rotationAngle << std::endl;
     if (moveAxes == 1) {
         y = x * tan(m_rotationAngle);
         m_cursorActor->getActorTranslate()->AddPosition(x,y, 0);
@@ -181,7 +186,6 @@ void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double 
     }   
     else {
         x=-y / cos(m_rotationAngle)*sin(m_rotationAngle);
-        //x = -y * cos(m_rotationAngle) * sin(m_rotationAngle);
         m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
         m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
     }
