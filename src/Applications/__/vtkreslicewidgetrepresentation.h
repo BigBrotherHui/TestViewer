@@ -30,7 +30,7 @@ namespace asclepios::gui
 		int HasTranslucentPolygonalGeometry() override;
 
 
-		void rotate(double x,double y);
+		void rotate(double x, double y, char moveAxes);
 		void setPlane(int t_plane);
 
 		void setCursorPosition(double* t_position);

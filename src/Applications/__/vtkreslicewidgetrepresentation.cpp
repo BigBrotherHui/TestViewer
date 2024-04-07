@@ -169,11 +169,14 @@ int asclepios::gui::vtkResliceWidgetRepresentation::HasTranslucentPolygonalGeome
 }
 
 //-----------------------------------------------------------------------------
-void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double x,double y)
+void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double x, double y, char moveAxes)
 {
 	// m_rotationAngle += t_angle;
 	// m_cursorActor->getActor()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
-    m_cursorActor->getActor()->AddPosition(x,0,0);
+    if (moveAxes == 1)
+        m_cursorActor->getActor()->AddPosition(x, 0, 0);
+    else
+        m_cursorActor->getActor()->AddPosition(0, y, 0);
 }
 
 //-----------------------------------------------------------------------------

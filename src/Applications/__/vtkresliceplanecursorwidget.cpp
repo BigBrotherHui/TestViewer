@@ -14,6 +14,7 @@
 #include "vtkreslicewidgetrepresentation.h"
 #include <vtkRendererCollection.h>
 #include <QApplication>
+#include <vtkPointData.h>
 vtkStandardNewMacro(asclepios::gui::vtkReslicePlaneCursorWidget);
 
 double asclepios::gui::vtkReslicePlaneCursorWidget::__lastCursorPos[3]{};
@@ -220,7 +221,13 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseDownAction(vtkAbstrac
 		{
 			if (picker->GetActor() == resliceActor->getActor())
 			{
-				self->m_state = translate;
+			    self->m_state = translate;
+                            auto id=picker->GetPointId();
+                            self->m_selectedAxis = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
+                                                     ->GetInput()
+                                                     ->GetPointData()
+                                                     ->GetScalars()
+                                                     ->GetTuple1(id);
 			}
 		}
 		self->InvokeEvent(qualityLow, &self->m_plane);
@@ -287,7 +294,7 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::moveMouse(vtkAbstractWidget* w
                         coordinate->SetValue(lastX, lastY);
                         double* lastworldCoordinate = coordinate->GetComputedWorldValue(renderer);
                         self->rotateCursor(cd[0] - lastworldCoordinate[0],
-                                           cd[1] - lastworldCoordinate[1]);
+                                           cd[1] - lastworldCoordinate[1],self->m_selectedAxis);
 
                         self->InvokeEvent(cursorMove, pos);
 		}
@@ -314,9 +321,9 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseUpAction(vtkAbstractW
 }
 
 //-----------------------------------------------------------------------------
-void asclepios::gui::vtkReslicePlaneCursorWidget::rotateCursor(double x,double y) const
+void asclepios::gui::vtkReslicePlaneCursorWidget::rotateCursor(double x, double y, char moveAxes) const
 {
-	dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep)->rotate(x,y);
+	dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep)->rotate(x,y,moveAxes);
 }
 
 //-----------------------------------------------------------------------------

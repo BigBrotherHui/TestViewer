@@ -9,8 +9,20 @@
 #include <QDebug>
 #include <vtkPolyData.h>
 #include <vtkContourFilter.h>
+#include <vtkCharArray.h>
 vtkStandardNewMacro(asclepios::gui::vtkResliceActor);
+namespace {
+void AssignScalarValueTo(vtkPolyData* polydata, char value)
+{
+    vtkSmartPointer<vtkCharArray> pointData = vtkSmartPointer<vtkCharArray>::New();
 
+    int numberOfPoints = polydata->GetNumberOfPoints();
+    pointData->SetNumberOfComponents(1);
+    pointData->SetNumberOfTuples(numberOfPoints);
+    pointData->FillComponent(0, value);
+    polydata->GetPointData()->SetScalars(pointData);
+}
+}  // namespace
 void asclepios::gui::vtkResliceActor::createActor()
 {
 	m_appender = vtkSmartPointer<vtkAppendPolyData>::New();
@@ -98,12 +110,16 @@ void asclepios::gui::vtkResliceActor::update()
 			m_centerPointDisplayPosition[1], 0.01);
 		m_cursorLines[0]->Update();
 		m_cursorLines[0]->GetOutput()->GetPointData()->AddArray(m_colors[1]);
+                AssignScalarValueTo(m_cursorLines[0]->GetOutput(),0);
+
 		m_cursorLines[1]->SetPoint1(m_centerPointDisplayPosition[0],
 			m_windowOrigin[1], 0.01);
 		m_cursorLines[1]->SetPoint2(m_centerPointDisplayPosition[0],
 			m_windowSize[1], 0.01);
 		m_cursorLines[1]->Update();
 		m_cursorLines[1]->GetOutput()->GetPointData()->AddArray(m_colors[0]);
+                AssignScalarValueTo(m_cursorLines[1]->GetOutput(), 1);
+
 		m_actor->SetScale(5);
 		//circleactor->SetScale(5);
 		//resultactor->SetScale(5);
