@@ -273,12 +273,6 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::moveMouse(vtkAbstractWidget* w
 		break;
 	    case translate:
 	    {
-                auto* const representation = dynamic_cast<vtkResliceWidgetRepresentation*>(self->WidgetRep);
-                double pos[3] = {0.00, 0.00, 0.00};
-                pos[0] = representation->getResliceActor()->getActorTranslate()->GetPosition()[0] - __lastCursorPos[0];
-                pos[1] = representation->getResliceActor()->getActorTranslate()->GetPosition()[1] - __lastCursorPos[1];
-                pos[2] = representation->getResliceActor()->getActorTranslate()->GetPosition()[2] - __lastCursorPos[2];
-
 	        auto renderer = self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
                 vtkNew<vtkCoordinate> coordinate;
                 coordinate->SetCoordinateSystemToDisplay();
@@ -287,8 +281,13 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::moveMouse(vtkAbstractWidget* w
                 double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};	
                 coordinate->SetValue(lastX, lastY);
                 double* lastworldCoordinate = coordinate->GetComputedWorldValue(renderer);
-                self->translateCursor(cd[0] - lastworldCoordinate[0],
-                                   cd[1] - lastworldCoordinate[1],self->m_selectedAxis);
+                self->translateCursor(cd[0] - lastworldCoordinate[0], cd[1] - lastworldCoordinate[1],
+                                      cd[2] - lastworldCoordinate[2] ,self->m_selectedAxis);
+                auto* const representation = dynamic_cast<vtkResliceWidgetRepresentation*>(self->WidgetRep);
+                double pos[3] = {0.00, 0.00, 0.00};
+                pos[0] = representation->getResliceActor()->getActorTranslate()->GetPosition()[0] - __lastCursorPos[0];
+                pos[1] = representation->getResliceActor()->getActorTranslate()->GetPosition()[1] - __lastCursorPos[1];
+                pos[2] = representation->getResliceActor()->getActorTranslate()->GetPosition()[2] - __lastCursorPos[2];
 
                 self->InvokeEvent(cursorMove, pos);
 	    }
@@ -333,9 +332,9 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::rotateCursor(double t_angle) c
     dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep)->rotate(t_angle);
 }
 
-void asclepios::gui::vtkReslicePlaneCursorWidget::translateCursor(double x, double y, char moveAxes) const
+void asclepios::gui::vtkReslicePlaneCursorWidget::translateCursor(double x, double y,double z, char moveAxes) const
 {
-    dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep)->translate(x, y, moveAxes);
+    dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep)->translate(x, y,z, moveAxes);
 }
 
 //-----------------------------------------------------------------------------

@@ -9,7 +9,8 @@
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRegularPolygonSource.h>
-
+#include <vtkMatrix4x4.h>
+#include <vtkTransform.h>
 vtkStandardNewMacro(asclepios::gui::vtkResliceWidgetRepresentation);
 
 asclepios::gui::vtkResliceWidgetRepresentation::vtkResliceWidgetRepresentation()
@@ -171,16 +172,19 @@ void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double t_angle)
      m_cursorActor->getActorTranslate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
 }
 
-void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double y, char moveAxes)
+void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double y,double z, char moveAxes)
 {
     if (moveAxes == 1) {
-        m_cursorActor->getActorTranslate()->AddPosition(x, 0, 0);
-        m_cursorActor->getActorRotate()->AddPosition(x, 0, 0);
+        y = x * tan(m_rotationAngle);
+        m_cursorActor->getActorTranslate()->AddPosition(x,y, 0);
+        m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
     }   
     else {
-        m_cursorActor->getActorTranslate()->AddPosition(0, y, 0);
-        m_cursorActor->getActorRotate()->AddPosition(0, y, 0);
-    }   
+        x=-y / cos(m_rotationAngle)*sin(m_rotationAngle);
+        //x = -y * cos(m_rotationAngle) * sin(m_rotationAngle);
+        m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
+        m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
+    }
 }
 
 //-----------------------------------------------------------------------------

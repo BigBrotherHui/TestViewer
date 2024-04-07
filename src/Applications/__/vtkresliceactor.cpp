@@ -98,7 +98,7 @@ void asclepios::gui::vtkResliceActor::update()
 {
 	if (m_start == 0)
 	{
-            int factor = 14;
+            int factor = 10;
             m_cursorLines[0]->SetPoint1(m_centerPointDisplayPosition[0] - m_windowSize[0] / factor,
 			m_centerPointDisplayPosition[1], 0.01);
             m_cursorLines[0]->SetPoint2(m_centerPointDisplayPosition[0] + m_windowSize[0] / factor,

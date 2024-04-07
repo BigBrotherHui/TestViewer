@@ -49,7 +49,7 @@ namespace asclepios::gui
 		static void leftMouseUpAction(vtkAbstractWidget* w);
 
 		void rotateCursor(double t_angle) const;
-                void translateCursor(double x, double y, char moveAxes) const;
+                void translateCursor(double x, double y,double z, char moveAxes) const;
 		friend class vtkReslicePlaneCursorCallback;
                 char m_selectedAxis{-1};
 	};
