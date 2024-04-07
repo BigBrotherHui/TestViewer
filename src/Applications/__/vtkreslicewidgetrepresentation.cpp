@@ -69,7 +69,12 @@ void asclepios::gui::vtkResliceWidgetRepresentation::instantiateHandleRepresenta
 {
 	if (!m_centerMovementPointRepresentation)
 	{
-		m_centerMovementPointRepresentation = vtkSmartPointer<vtkPointHandleRepresentation3D>::New();
+		m_centerMovementPointRepresentation = vtkSmartPointer<PointHandleRepresentation3D>::New();
+                m_centerMovementPointRepresentation->SetSmoothMotion(1);
+                m_centerMovementPointRepresentation->SetHandleSize(0);
+                m_centerMovementPointRepresentation->SetTolerance(15);
+                m_centerMovementPointRepresentation->AllOff();
+                m_centerMovementPointRepresentation->TranslationModeOn();
 	}
 }
 

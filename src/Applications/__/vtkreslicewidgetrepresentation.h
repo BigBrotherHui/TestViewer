@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vtkPointHandleRepresentation3D.h>
+#include "PointHandleRepresentation3D.h"
 #include <vtkSmartPointer.h>
 #include <vtkWidgetRepresentation.h>
 #include "vtkresliceactor.h"
@@ -39,13 +39,13 @@ namespace asclepios::gui
 		int ComputeInteractionState(int X, int Y, int modify) override;
 
 		[[nodiscard]] vtkSmartPointer<vtkResliceActor> getResliceActor() const { return m_cursorActor; }
-		[[nodiscard]] vtkSmartPointer<vtkPointHandleRepresentation3D> getCenterMovementRepresentation() const {
+		[[nodiscard]] vtkSmartPointer<PointHandleRepresentation3D> getCenterMovementRepresentation() const {
 			return m_centerMovementPointRepresentation;
 		}
 		enum InteractionState { outside = 0, mprCursor, mipCursor, handleCursor };
 
 	private:
-		vtkSmartPointer<vtkPointHandleRepresentation3D> m_centerMovementPointRepresentation = {};
+                vtkSmartPointer<PointHandleRepresentation3D> m_centerMovementPointRepresentation = {};
 		vtkSmartPointer<vtkResliceActor> m_cursorActor;
 		bool m_cursorVisibility = false;
 		double m_rotationAngle = 0;
