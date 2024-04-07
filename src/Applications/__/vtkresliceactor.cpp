@@ -25,54 +25,48 @@ void AssignScalarValueTo(vtkPolyData* polydata, char value)
 }  // namespace
 void asclepios::gui::vtkResliceActor::createActor()
 {
-	m_appender = vtkSmartPointer<vtkAppendPolyData>::New();
+        m_appenderTranslate = vtkSmartPointer<vtkAppendPolyData>::New();
+        m_appenderRotate = vtkSmartPointer<vtkAppendPolyData>::New();
 	for (auto i = 0; i < 2; ++i)
 	{
-		m_cursorLines[i] = vtkSmartPointer<vtkLineSource>::New();
-		m_appender->AddInputConnection(m_cursorLines[i]->GetOutputPort());
+	    m_cursorLines[i] = vtkSmartPointer<vtkLineSource>::New();
+            m_appenderTranslate->AddInputConnection(m_cursorLines[i]->GetOutputPort());
 	}
-	m_mapper =
+        for (auto i = 0; i < 4; ++i) {
+            m_cursorLines2[i] = vtkSmartPointer<vtkLineSource>::New();
+            m_appenderRotate->AddInputConnection(m_cursorLines2[i]->GetOutputPort());
+        }
+
+        vtkSmartPointer<vtkPolyDataMapper> m_mapper =
 		vtkSmartPointer<vtkPolyDataMapper>::New();
-	m_mapper->SetInputConnection(m_appender->GetOutputPort());
+        m_mapper->SetInputConnection(m_appenderTranslate->GetOutputPort());
 	m_mapper->ScalarVisibilityOn();
 	m_mapper->SetScalarModeToUsePointFieldData();
 	m_mapper->SelectColorArray("Colors");
-	m_actor =
+        m_actorTranslate =
 		vtkSmartPointer<vtkActor>::New();
-	m_actor->SetMapper(m_mapper);
-	m_actor->GetProperty()->SetInterpolationToGouraud();
+        m_actorTranslate->SetMapper(m_mapper);
+        m_actorTranslate->GetProperty()->SetInterpolationToGouraud();
 
 
-	circleactor = vtkSmartPointer<vtkActor>::New();
-	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	vtkNew<vtkRegularPolygonSource> source;
-	source->SetNumberOfSides(30);
-	source->SetRadius(10);
-	source->SetCenter(0, 0, 0);
-	source->Update();
-	
-	mapper->SetInputData(source->GetOutput());
-	circleactor->SetMapper(mapper);
-	circleactor->GetProperty()->SetRepresentationToWireframe();
-
-	resultactor = vtkSmartPointer<vtkActor>::New();
-	vtkSmartPointer<vtkPolyDataMapper> mapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
-	resultactor->SetMapper(mapper2);
-	append = vtkSmartPointer<vtkAppendPolyData>::New();
-	mapper2->SetInputConnection(append->GetOutputPort());
-	resultactor->GetProperty()->SetRepresentationToWireframe();
+	vtkSmartPointer<vtkPolyDataMapper> m_mapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
+        m_mapper2->SetInputConnection(m_appenderRotate->GetOutputPort());
+        m_mapper2->ScalarVisibilityOn();
+        m_mapper2->SetScalarModeToUsePointFieldData();
+        m_mapper2->SelectColorArray("Colors");
+        m_actorRotate = vtkSmartPointer<vtkActor>::New();
+        m_actorRotate->SetMapper(m_mapper2);
+        m_actorRotate->GetProperty()->SetInterpolationToGouraud();
 }
 
 //-----------------------------------------------------------------------------
 void asclepios::gui::vtkResliceActor::reset() const
 {
-	auto* const orientation = m_actor->GetOrientation();
-	m_actor->RotateZ(-orientation[2]);
-	m_actor->SetPosition(0, 0, 0);
-
-	auto* const ori = circleactor->GetOrientation();
-	circleactor->RotateZ(-ori[2]);
-	circleactor->SetPosition(0, 0, 0);
+    auto* const orientation = m_actorTranslate->GetOrientation();
+    m_actorTranslate->RotateZ(-orientation[2]);
+    m_actorTranslate->SetPosition(0, 0, 0);
+    m_actorRotate->RotateZ(-orientation[2]);
+    m_actorRotate->SetPosition(0, 0, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -104,44 +98,67 @@ void asclepios::gui::vtkResliceActor::update()
 {
 	if (m_start == 0)
 	{
-		m_cursorLines[0]->SetPoint1(m_windowOrigin[0],
+            int factor = 14;
+            m_cursorLines[0]->SetPoint1(m_centerPointDisplayPosition[0] - m_windowSize[0] / factor,
 			m_centerPointDisplayPosition[1], 0.01);
-		m_cursorLines[0]->SetPoint2(m_windowSize[0],
+            m_cursorLines[0]->SetPoint2(m_centerPointDisplayPosition[0] + m_windowSize[0] / factor,
 			m_centerPointDisplayPosition[1], 0.01);
-		m_cursorLines[0]->Update();
-		m_cursorLines[0]->GetOutput()->GetPointData()->AddArray(m_colors[1]);
-                AssignScalarValueTo(m_cursorLines[0]->GetOutput(),0);
+	    m_cursorLines[0]->Update();
+	    m_cursorLines[0]->GetOutput()->GetPointData()->AddArray(m_colors[1]);
+            AssignScalarValueTo(m_cursorLines[0]->GetOutput(), 0);
 
-		m_cursorLines[1]->SetPoint1(m_centerPointDisplayPosition[0],
-			m_windowOrigin[1], 0.01);
-		m_cursorLines[1]->SetPoint2(m_centerPointDisplayPosition[0],
-			m_windowSize[1], 0.01);
-		m_cursorLines[1]->Update();
-		m_cursorLines[1]->GetOutput()->GetPointData()->AddArray(m_colors[0]);
-                AssignScalarValueTo(m_cursorLines[1]->GetOutput(), 1);
+	    m_cursorLines2[0]->SetPoint1(m_centerPointDisplayPosition[0] - m_windowSize[0] / factor*2,
+                                         m_centerPointDisplayPosition[1], 0.01);
+            m_cursorLines2[0]->SetPoint2(m_centerPointDisplayPosition[0] - m_windowSize[0] / factor,
+                                         m_centerPointDisplayPosition[1], 0.01);
+            m_cursorLines2[0]->Update();
+            m_cursorLines2[0]->GetOutput()->GetPointData()->AddArray(m_colors[1]);
 
-		m_actor->SetScale(5);
-		//circleactor->SetScale(5);
-		//resultactor->SetScale(5);
-		m_start = 1;
+            m_cursorLines2[2]->SetPoint1(m_centerPointDisplayPosition[0] + m_windowSize[0] / factor * 2,
+                                         m_centerPointDisplayPosition[1], 0.01);
+            m_cursorLines2[2]->SetPoint2(m_centerPointDisplayPosition[0] + m_windowSize[0] / factor,
+                                         m_centerPointDisplayPosition[1], 0.01);
+            m_cursorLines2[2]->Update();
+            m_cursorLines2[2]->GetOutput()->GetPointData()->AddArray(m_colors[1]);
+
+
+	    m_cursorLines[1]->SetPoint1(m_centerPointDisplayPosition[0],
+                                        m_centerPointDisplayPosition[1] -m_windowSize[1] / factor, 0.01);
+            m_cursorLines[1]->SetPoint2(m_centerPointDisplayPosition[0],
+                                        m_centerPointDisplayPosition[1] +m_windowSize[1] / factor, 0.01);
+	    m_cursorLines[1]->Update();
+	    m_cursorLines[1]->GetOutput()->GetPointData()->AddArray(m_colors[0]);
+            AssignScalarValueTo(m_cursorLines[1]->GetOutput(), 1);
+
+
+            m_cursorLines2[1]->SetPoint1(m_centerPointDisplayPosition[0],
+                                         m_centerPointDisplayPosition[0] - m_windowSize[1] / factor*2,
+                                         0.01);
+            m_cursorLines2[1]->SetPoint2(m_centerPointDisplayPosition[0],
+                                         m_centerPointDisplayPosition[0] - m_windowSize[1] / factor,
+                                         0.01);
+            m_cursorLines2[1]->Update();
+            m_cursorLines2[1]->GetOutput()->GetPointData()->AddArray(m_colors[0]);
+
+            m_cursorLines2[3]->SetPoint1(m_centerPointDisplayPosition[0],
+                                         m_centerPointDisplayPosition[0] + m_windowSize[1] / factor * 2, 0.01);
+            m_cursorLines2[3]->SetPoint2(m_centerPointDisplayPosition[0],
+                                         m_centerPointDisplayPosition[0] + m_windowSize[1] / factor, 0.01);
+            m_cursorLines2[3]->Update();
+            m_cursorLines2[3]->GetOutput()->GetPointData()->AddArray(m_colors[0]);
+
+	    m_actorTranslate->SetScale(5);
+            m_actorRotate->SetScale(5);
+
+	    m_start = 1;
 	}
 	else
 	{
-		m_actor->SetPosition(
+            m_actorTranslate->SetPosition(
 			m_centerPointDisplayPosition[0],
 			m_centerPointDisplayPosition[1],
 			0.01);
-		circleactor->SetPosition(
-			m_centerPointDisplayPosition[0],
-			m_centerPointDisplayPosition[1],
-			0.01);
-
-		vtkSmartPointer<vtkRegularPolygonSource> source= vtkSmartPointer<vtkRegularPolygonSource>::New();
-		source->SetNumberOfSides(30);
-		source->SetRadius(10);
-		source->SetCenter(m_centerPointDisplayPosition[0],
-			m_centerPointDisplayPosition[1],0);
-		append->AddInputConnection(source->GetOutputPort());
+            m_actorRotate->SetPosition(m_centerPointDisplayPosition[0], m_centerPointDisplayPosition[1], 0.01);
 	}
 }
 

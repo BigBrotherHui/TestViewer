@@ -30,7 +30,8 @@ namespace asclepios::gui
 		int HasTranslucentPolygonalGeometry() override;
 
 
-		void rotate(double x, double y, char moveAxes);
+		void rotate(double t_angle);
+                void translate(double x, double y, char moveAxes);
 		void setPlane(int t_plane);
 
 		void setCursorPosition(double* t_position);
@@ -42,7 +43,7 @@ namespace asclepios::gui
 		[[nodiscard]] vtkSmartPointer<PointHandleRepresentation3D> getCenterMovementRepresentation() const {
 			return m_centerMovementPointRepresentation;
 		}
-		enum InteractionState { outside = 0, mprCursor, mipCursor, handleCursor };
+		enum InteractionState { outside = 0, translateCursor,rotateCursor, mipCursor, handleCursor };
 
 	private:
                 vtkSmartPointer<PointHandleRepresentation3D> m_centerMovementPointRepresentation = {};

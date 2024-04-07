@@ -56,10 +56,16 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 	picker->SetTolerance(0.01);
 	picker->InitializePickList();
 	picker->PickFromListOn();
-	picker->AddPickList(m_cursorActor->getActor());
+	picker->AddPickList(m_cursorActor->getActorTranslate());
+	picker->AddPickList(m_cursorActor->getActorRotate());
 	if (picker->Pick(X, Y, 0, Renderer))
 	{
-		return mprCursor;
+            if (picker->GetActor() == m_cursorActor->getActorTranslate()) {
+                return translateCursor;
+            }
+            else if (picker->GetActor() == m_cursorActor->getActorRotate()) {
+                return rotateCursor;
+            }
 	}
 	return outside;
 }
@@ -113,11 +119,8 @@ void asclepios::gui::vtkResliceWidgetRepresentation::ReleaseGraphicsResources(
 {
 	if (m_cursorActor && m_cursorVisibility)
 	{
-		m_cursorActor->getActor()->ReleaseGraphicsResources(w);
-		if (m_cursorActor->circleactor)
-		{
-			m_cursorActor->circleactor->ReleaseGraphicsResources(w);
-		}
+        m_cursorActor->getActorTranslate()->ReleaseGraphicsResources(w);
+		m_cursorActor->getActorRotate()->ReleaseGraphicsResources(w);
 	}
 }
 
@@ -126,13 +129,10 @@ int asclepios::gui::vtkResliceWidgetRepresentation::RenderOverlay(
 	vtkViewport* viewport)
 {
 	int count = 0;
-	if (m_cursorActor->getActor() && m_cursorVisibility)
+    if (m_cursorActor->getActorTranslate() && m_cursorVisibility)
 	{
-		count += m_cursorActor->getActor()->RenderOverlay(viewport);
-		if (m_cursorActor->circleactor)
-		{
-			count += m_cursorActor->circleactor->RenderOverlay(viewport);
-		}
+            count += m_cursorActor->getActorTranslate()->RenderOverlay(viewport);
+			count += m_cursorActor->getActorRotate()->RenderOverlay(viewport);
 	}
 	return count;
 }
@@ -141,16 +141,11 @@ int asclepios::gui::vtkResliceWidgetRepresentation::RenderOverlay(
 int asclepios::gui::vtkResliceWidgetRepresentation::RenderOpaqueGeometry(
 	vtkViewport* viewport)
 {
-	if (m_cursorActor->getActor() &&
-		m_cursorActor->getActor()->GetVisibility() &&
+    if (m_cursorActor->getActorTranslate() && m_cursorActor->getActorTranslate()->GetVisibility() &&
 		m_cursorVisibility)
 	{
-		m_cursorActor->getActor()->RenderOpaqueGeometry(viewport);
-		/*if(m_cursorActor->circleactor)
-		{
-			m_cursorActor->circleactor->RenderOpaqueGeometry(viewport);
-			m_cursorActor->resultactor->RenderOpaqueGeometry(viewport);
-		}*/
+            m_cursorActor->getActorTranslate()->RenderOpaqueGeometry(viewport);
+			m_cursorActor->getActorRotate()->RenderOpaqueGeometry(viewport);
 	}
 	else
 	{
@@ -163,20 +158,29 @@ int asclepios::gui::vtkResliceWidgetRepresentation::RenderOpaqueGeometry(
 int asclepios::gui::vtkResliceWidgetRepresentation::HasTranslucentPolygonalGeometry()
 {
 	BuildRepresentation();
-	return m_cursorActor->getActor()
-		       ? m_cursorActor->getActor()->HasTranslucentPolygonalGeometry()
+    return m_cursorActor->getActorTranslate()
+                   ? m_cursorActor->getActorTranslate()->HasTranslucentPolygonalGeometry()
 		       : 0;
 }
 
 //-----------------------------------------------------------------------------
-void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double x, double y, char moveAxes)
+void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double t_angle)
 {
-	// m_rotationAngle += t_angle;
-	// m_cursorActor->getActor()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
-    if (moveAxes == 1)
-        m_cursorActor->getActor()->AddPosition(x, 0, 0);
-    else
-        m_cursorActor->getActor()->AddPosition(0, y, 0);
+     m_rotationAngle += t_angle;
+     m_cursorActor->getActorRotate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
+     m_cursorActor->getActorTranslate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
+}
+
+void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double y, char moveAxes)
+{
+    if (moveAxes == 1) {
+        m_cursorActor->getActorTranslate()->AddPosition(x, 0, 0);
+        m_cursorActor->getActorRotate()->AddPosition(x, 0, 0);
+    }   
+    else {
+        m_cursorActor->getActorTranslate()->AddPosition(0, y, 0);
+        m_cursorActor->getActorRotate()->AddPosition(0, y, 0);
+    }   
 }
 
 //-----------------------------------------------------------------------------

@@ -19,9 +19,8 @@ namespace asclepios::gui
 		~vtkResliceActor() = default;
 
 		//getters
-		[[nodiscard]] vtkActor* getActor() const { return m_actor; }
-		vtkSmartPointer<vtkActor> circleactor{ nullptr };
-		vtkSmartPointer<vtkActor> resultactor{ nullptr };
+                [[nodiscard]] vtkActor* getActorTranslate() const { return m_actorTranslate; }
+                [[nodiscard]] vtkActor* getActorRotate() const { return m_actorRotate; }
 		vtkSmartPointer<vtkAppendPolyData> append;
 		[[nodiscard]] vtkMTimeType getLineTime() const { return m_cursorLines[0]->GetMTime(); }
 
@@ -37,12 +36,11 @@ namespace asclepios::gui
 		void createColors(double* t_color1, double* t_color2);
 
 	private:
-		vtkSmartPointer<vtkAppendPolyData> m_appender = {};
-		vtkSmartPointer<vtkActor> m_actor = {};
+                vtkSmartPointer<vtkAppendPolyData> m_appenderTranslate = {}, m_appenderRotate = {};
+                vtkSmartPointer<vtkActor> m_actorRotate = {}, m_actorTranslate = {};
 		vtkSmartPointer<vtkTransformFilter> m_filter = {};
-		vtkSmartPointer<vtkLineSource> m_cursorLines[4] = {};
+                vtkSmartPointer<vtkLineSource> m_cursorLines[2] = {}, m_cursorLines2[4];
 		vtkSmartPointer<vtkUnsignedCharArray> m_colors[3] = {};
-		vtkSmartPointer<vtkPolyDataMapper> m_mapper = {};
 		double m_windowSize[3] = {};
 		double m_windowOrigin[3] = {};
 		double m_centerPointDisplayPosition[3] = {};
