@@ -19,18 +19,18 @@ namespace asclepios::gui
 		void StartWidgetInteraction(double eventPos[2]) override {};
 		void WidgetInteraction(double newEventPos[2]) override {};
 
-		//这个在vtkAbstractWidget中仅在SetEnabled（1）中调用
-		//在vtkWidgetRepresentation无调用，有的rep类中在RenderOpaqueGeometry、RenderTranslucentPolygonalGeometry、HasTranslucentPolygonalGeometry
-		//的一开始都调用了
+		//锟斤拷锟斤拷锟絭tkAbstractWidget锟叫斤拷锟斤拷SetEnabled锟斤拷1锟斤拷锟叫碉拷锟斤拷
+		//锟斤拷vtkWidgetRepresentation锟睫碉拷锟矫ｏ拷锟叫碉拷rep锟斤拷锟斤拷锟斤拷RenderOpaqueGeometry锟斤拷RenderTranslucentPolygonalGeometry锟斤拷HasTranslucentPolygonalGeometry
+		//锟斤拷一锟斤拷始锟斤拷锟斤拷锟斤拷锟斤拷
 		void BuildRepresentation() override;
 		void ReleaseGraphicsResources(vtkWindow* w) override;
 		int RenderOverlay(vtkViewport* viewport) override;
-		//不以actor调用这个方法则actor在vtkViewport中不可见（vtkViewport就是vtkRenderer的父类）
+		//锟斤拷锟斤拷actor锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟絘ctor锟斤拷vtkViewport锟叫诧拷锟缴硷拷锟斤拷vtkViewport锟斤拷锟斤拷vtkRenderer锟侥革拷锟洁）
 		int RenderOpaqueGeometry(vtkViewport* viewport) override;
 		int HasTranslucentPolygonalGeometry() override;
 
 
-		void rotate(double t_angle);
+		void rotate(double x,double y);
 		void setPlane(int t_plane);
 
 		void setCursorPosition(double* t_position);

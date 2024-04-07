@@ -16,11 +16,11 @@ int main(int argc, char* argv[])
 	QApplication application(argc, argv);
 	//vtkObject::GlobalWarningDisplayOff();
 	application.setWindowIcon(QIcon(iconapp));
-        MainWindow w;
-        w.show();
-	//asclepios::gui::GUIFrame guiFrame;
-	//asclepios::gui::GUI gui;
-	//guiFrame.setContent(&gui);
-	//guiFrame.showMaximized();
+        //MainWindow w;
+        //w.show();
+	asclepios::gui::GUIFrame guiFrame;
+	asclepios::gui::GUI gui;
+	guiFrame.setContent(&gui);
+	guiFrame.showMaximized();
 	return application.exec();
 }

@@ -141,11 +141,11 @@ int asclepios::gui::vtkResliceWidgetRepresentation::RenderOpaqueGeometry(
 		m_cursorVisibility)
 	{
 		m_cursorActor->getActor()->RenderOpaqueGeometry(viewport);
-		if(m_cursorActor->circleactor)
+		/*if(m_cursorActor->circleactor)
 		{
 			m_cursorActor->circleactor->RenderOpaqueGeometry(viewport);
 			m_cursorActor->resultactor->RenderOpaqueGeometry(viewport);
-		}
+		}*/
 	}
 	else
 	{
@@ -164,10 +164,11 @@ int asclepios::gui::vtkResliceWidgetRepresentation::HasTranslucentPolygonalGeome
 }
 
 //-----------------------------------------------------------------------------
-void asclepios::gui::vtkResliceWidgetRepresentation::rotate(const double t_angle)
+void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double x,double y)
 {
-	m_rotationAngle += t_angle;
-	m_cursorActor->getActor()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
+	// m_rotationAngle += t_angle;
+	// m_cursorActor->getActor()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
+    m_cursorActor->getActor()->AddPosition(x,0,0);
 }
 
 //-----------------------------------------------------------------------------

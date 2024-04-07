@@ -39,7 +39,7 @@ namespace asclepios::gui
 		int m_plane = -1;
 		double lastCursorPos[3]{};
 		double m_cursorCenterPosition[3]{};
-
+                static double __lastCursorPos[3];
 		void startWidgetInteraction(int handleNum);
 		void widgetInteraction(int handleNum);
 		void endWidgetInteraction(int handleNum);
@@ -48,7 +48,7 @@ namespace asclepios::gui
 		static void moveMouse(vtkAbstractWidget* w);
 		static void leftMouseUpAction(vtkAbstractWidget* w);
 
-		void rotateCursor(double t_angle) const;
+		void rotateCursor(double x,double y) const;
 
 		friend class vtkReslicePlaneCursorCallback;
 	};
