@@ -7,7 +7,6 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkTransformFilter.h>
 #include <vtkContourFilter.h>
-#include "vtkPolyDataBooleanFilter.h"
 namespace asclepios::gui
 {
 	class vtkResliceActor final : public vtkObject
@@ -46,7 +45,10 @@ namespace asclepios::gui
 		double m_centerPointDisplayPosition[3] = {};
 		double m_cameraDistance = 0;
 		int m_start = 0;
-
+                vtkSmartPointer<vtkPolyData> arrowTop1=vtkSmartPointer<vtkPolyData>::New();
+                vtkSmartPointer<vtkPolyData> arrowTop2 = vtkSmartPointer<vtkPolyData>::New();
+                vtkSmartPointer<vtkPolyData> arrowLeft1 = vtkSmartPointer<vtkPolyData>::New();
+                vtkSmartPointer<vtkPolyData> arrowLeft2 = vtkSmartPointer<vtkPolyData>::New();
 
 	};
 }

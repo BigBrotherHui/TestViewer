@@ -218,17 +218,17 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseDownAction(vtkAbstrac
 	}
 	if (picker->Pick(X, Y, 0, self->GetCurrentRenderer()))
 	{
-		if (self->m_state != translate)
+		if (self->m_state != bothTranslate)
 		{
             if (picker->GetActor() == resliceActor->getActorTranslate())
 			{
 			    self->m_state = translate;
-                            auto id=picker->GetPointId();
-                            self->m_selectedAxis = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
-                                                     ->GetInput()
-                                                     ->GetPointData()
-                                                     ->GetScalars()
-                                                     ->GetTuple1(id);
+				auto id=picker->GetPointId();
+				self->m_selectedAxis = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
+											->GetInput()
+											->GetPointData()
+											->GetScalars()
+											->GetTuple1(id);
 			}
 			else if(picker->GetActor() == resliceActor->getActorRotate()){
 				self->m_state = rotate;
@@ -259,37 +259,36 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::moveMouse(vtkAbstractWidget* w
 	vtkNew<vtkCoordinate> actorCoordinates;
 	switch (self->m_state)
 	{
-            case start: {
-                self->SetCursor(self->WidgetRep->ComputeInteractionState(x, y));
-                if (!self->m_centerMovementWidget->GetEnabled()) {
-                    rep->BuildRepresentation();
-                    self->m_centerMovementWidget->SetEnabled(1);
-                }
-                auto* const representation = dynamic_cast<vtkResliceWidgetRepresentation*>(self->WidgetRep);
-                __lastCursorPos[0] = representation->getResliceActor()->getActorTranslate()->GetPosition()[0];
-                __lastCursorPos[1] = representation->getResliceActor()->getActorTranslate()->GetPosition()[1];
-                __lastCursorPos[2] = representation->getResliceActor()->getActorTranslate()->GetPosition()[2];
-                }
+		case start: {
+			self->SetCursor(self->WidgetRep->ComputeInteractionState(x, y));
+			if (!self->m_centerMovementWidget->GetEnabled()) {
+				rep->BuildRepresentation();
+				self->m_centerMovementWidget->SetEnabled(1);
+			}
+			auto* const representation = dynamic_cast<vtkResliceWidgetRepresentation*>(self->WidgetRep);
+			__lastCursorPos[0] = representation->getResliceActor()->getActorTranslate()->GetPosition()[0];
+			__lastCursorPos[1] = representation->getResliceActor()->getActorTranslate()->GetPosition()[1];
+			__lastCursorPos[2] = representation->getResliceActor()->getActorTranslate()->GetPosition()[2];
+			}
 		break;
 	    case translate:
 	    {
 	        auto renderer = self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
-                vtkNew<vtkCoordinate> coordinate;
-                coordinate->SetCoordinateSystemToDisplay();
-                coordinate->SetValue(x, y);
-                double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
-                double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};	
-                coordinate->SetValue(lastX, lastY);
-                double* lastworldCoordinate = coordinate->GetComputedWorldValue(renderer);
-                self->translateCursor(cd[0] - lastworldCoordinate[0], cd[1] - lastworldCoordinate[1],
-                                      cd[2] - lastworldCoordinate[2] ,self->m_selectedAxis);
-                auto* const representation = dynamic_cast<vtkResliceWidgetRepresentation*>(self->WidgetRep);
-                double pos[3] = {0.00, 0.00, 0.00};
-                pos[0] = representation->getResliceActor()->getActorTranslate()->GetPosition()[0] - __lastCursorPos[0];
-                pos[1] = representation->getResliceActor()->getActorTranslate()->GetPosition()[1] - __lastCursorPos[1];
-                pos[2] = representation->getResliceActor()->getActorTranslate()->GetPosition()[2] - __lastCursorPos[2];
-
-                self->InvokeEvent(cursorMove, pos);
+			vtkNew<vtkCoordinate> coordinate;
+			coordinate->SetCoordinateSystemToDisplay();
+			coordinate->SetValue(x, y);
+			double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
+			double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};	
+			coordinate->SetValue(lastX, lastY);
+			double* lastworldCoordinate = coordinate->GetComputedWorldValue(renderer);
+			self->translateCursor(cd[0] - lastworldCoordinate[0], cd[1] - lastworldCoordinate[1],
+									cd[2] - lastworldCoordinate[2] ,self->m_selectedAxis);
+			auto* const representation = dynamic_cast<vtkResliceWidgetRepresentation*>(self->WidgetRep);
+			double pos[3] = {0.00, 0.00, 0.00};
+			pos[0] = representation->getResliceActor()->getActorTranslate()->GetPosition()[0] - __lastCursorPos[0];
+			pos[1] = representation->getResliceActor()->getActorTranslate()->GetPosition()[1] - __lastCursorPos[1];
+			pos[2] = representation->getResliceActor()->getActorTranslate()->GetPosition()[2] - __lastCursorPos[2];
+			self->InvokeEvent(cursorMove, pos);
 	    }
 	    break;
 	    case rotate:
@@ -353,19 +352,22 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::SetCursor(int t_state)
 	switch (t_state)
 	{
 	case vtkResliceWidgetRepresentation::outside:
-		RequestCursorShape(VTK_CURSOR_CUSTOM);
+		RequestCursorShape(VTK_CURSOR_DEFAULT);
 		break;
-	case vtkResliceWidgetRepresentation::translateCursor:
-                RequestCursorShape(VTK_CURSOR_SIZENS);
+	case vtkResliceWidgetRepresentation::translateCursorHor:
+		RequestCursorShape(VTK_CURSOR_SIZENS);
 		break;
-        case vtkResliceWidgetRepresentation::rotateCursor:
-                RequestCursorShape(VTK_CURSOR_CROSSHAIR);
-                break;
+	case vtkResliceWidgetRepresentation::translateCursorVer:
+		RequestCursorShape(VTK_CURSOR_SIZEWE);
+		break;
+	case vtkResliceWidgetRepresentation::rotateCursor:
+		RequestCursorShape(VTK_CURSOR_HAND);
+		break;
 	case vtkResliceWidgetRepresentation::handleCursor:
 		RequestCursorShape(VTK_CURSOR_SIZEALL);
 		break;
 	default:
-            RequestCursorShape(VTK_CURSOR_CUSTOM);
+		RequestCursorShape(VTK_CURSOR_DEFAULT);
 	}
 }
 
@@ -393,7 +395,7 @@ double* asclepios::gui::vtkReslicePlaneCursorWidget::getCursorCenterPosition()
 void asclepios::gui::vtkReslicePlaneCursorWidget::startWidgetInteraction(int handleNum)
 {
 	Superclass::StartInteraction();
-	m_state = translate;
+	m_state = bothTranslate;
 	InvokeEvent(vtkCommand::StartInteractionEvent, nullptr);
 	auto* const representation =
 		dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep);

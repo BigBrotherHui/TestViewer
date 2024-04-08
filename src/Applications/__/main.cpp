@@ -9,7 +9,6 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 VTK_MODULE_INIT(vtkRenderingFreeType);
 VTK_MODULE_INIT(vtkRenderingVolumeOpenGL2);
 
-#include "mainwindow.h"
 int main(int argc, char* argv[])
 {
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -21,6 +20,7 @@ int main(int argc, char* argv[])
 	asclepios::gui::GUIFrame guiFrame;
 	asclepios::gui::GUI gui;
 	guiFrame.setContent(&gui);
-	guiFrame.showMaximized();
+        guiFrame.show();
+	//guiFrame.showMaximized();
 	return application.exec();
 }

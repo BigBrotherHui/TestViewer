@@ -43,7 +43,7 @@ namespace asclepios::gui
 		[[nodiscard]] vtkSmartPointer<PointHandleRepresentation3D> getCenterMovementRepresentation() const {
 			return m_centerMovementPointRepresentation;
 		}
-		enum InteractionState { outside = 0, translateCursor,rotateCursor, mipCursor, handleCursor };
+		enum InteractionState { outside = 0, translateCursorHor,translateCursorVer,rotateCursor, mipCursor, handleCursor };
 
 	private:
                 vtkSmartPointer<PointHandleRepresentation3D> m_centerMovementPointRepresentation = {};

@@ -10,6 +10,12 @@
 #include <vtkPolyData.h>
 #include <vtkContourFilter.h>
 #include <vtkCharArray.h>
+#include <vtkArrowSource.h>
+#include <array>
+#include <vtkMatrix4x4.h>
+#include <vtkTransform.h>
+#include <vtkTransformPolyDataFilter.h>
+#include <vtkMinimalStandardRandomSequence.h>
 vtkStandardNewMacro(asclepios::gui::vtkResliceActor);
 namespace {
 void AssignScalarValueTo(vtkPolyData* polydata, char value)
@@ -93,6 +99,67 @@ void asclepios::gui::vtkResliceActor::setCenterPosition(const double* t_center)
 	m_centerPointDisplayPosition[2] = t_center[2];
 }
 
+vtkSmartPointer<vtkPolyData> CreateArrow(double& pdLength, std::array<double, 3>& startPoint,
+                                         std::array<double, 3>& endPoint)
+{
+    vtkSmartPointer<vtkPolyData> polyData;
+
+    // Create an arrow.
+    vtkNew<vtkArrowSource> arrowSource;
+    arrowSource->SetShaftRadius(pdLength * .01);
+    arrowSource->SetShaftResolution(20);
+    arrowSource->SetTipLength(pdLength * .1);
+    arrowSource->SetTipRadius(pdLength * .05);
+    arrowSource->SetTipResolution(20);
+
+    // Compute a basis
+    std::array<double, 3> normalizedX;
+    std::array<double, 3> normalizedY;
+    std::array<double, 3> normalizedZ;
+
+    // The X axis is a vector from start to end
+    vtkMath::Subtract(endPoint.data(), startPoint.data(), normalizedX.data());
+    double length = vtkMath::Norm(normalizedX.data());
+    vtkMath::Normalize(normalizedX.data());
+
+    // The Z axis is an arbitrary vector cross X
+    vtkNew<vtkMinimalStandardRandomSequence> rng;
+    rng->SetSeed(8775070);
+
+    std::array<double, 3> arbitrary;
+    for (auto i = 0; i < 3; ++i) {
+        rng->Next();
+        arbitrary[i] = rng->GetRangeValue(-10, 10);
+    }
+    vtkMath::Cross(normalizedX.data(), arbitrary.data(), normalizedZ.data());
+    vtkMath::Normalize(normalizedZ.data());
+
+    // The Y axis is Z cross X
+    vtkMath::Cross(normalizedZ.data(), normalizedX.data(), normalizedY.data());
+    vtkNew<vtkMatrix4x4> matrix;
+
+    // Create the direction cosine matrix
+    matrix->Identity();
+    for (auto i = 0; i < 3; i++) {
+        matrix->SetElement(i, 0, normalizedX[i]);
+        matrix->SetElement(i, 1, normalizedY[i]);
+        matrix->SetElement(i, 2, normalizedZ[i]);
+    }
+
+    // Apply the transforms
+    vtkNew<vtkTransform> transform;
+    transform->Translate(startPoint.data());
+    transform->Concatenate(matrix);
+    transform->Scale(length, length, length);
+
+    // Transform the polydata
+    vtkNew<vtkTransformPolyDataFilter> transformPD;
+    transformPD->SetTransform(transform);
+    transformPD->SetInputConnection(arrowSource->GetOutputPort());
+    transformPD->Update();
+    polyData = transformPD->GetOutput();
+    return polyData;
+}
 //-----------------------------------------------------------------------------
 void asclepios::gui::vtkResliceActor::update()
 {
@@ -106,15 +173,38 @@ void asclepios::gui::vtkResliceActor::update()
 	    m_cursorLines[0]->Update();
 	    m_cursorLines[0]->GetOutput()->GetPointData()->AddArray(m_colors[1]);
             AssignScalarValueTo(m_cursorLines[0]->GetOutput(), 0);
+            std::array<double, 3> start,end;
+            start[0] = m_centerPointDisplayPosition[0] - m_windowSize[0] / factor;
+            start[1] = 0;
+            start[2] = 0.01;
+            end[0] = m_centerPointDisplayPosition[0] - m_windowSize[0] / factor;
+            end[1] = -6;
+            end[2] = 0.01;
+            double length = 2;
+            arrowTop1->DeepCopy(CreateArrow(length, start, end));
+            AssignScalarValueTo(arrowTop1, 0);
+            m_appenderTranslate->AddInputData(arrowTop1);
+            arrowTop1->GetPointData()->AddArray(m_colors[1]);
 
-	    m_cursorLines2[0]->SetPoint1(m_centerPointDisplayPosition[0] - m_windowSize[0] / factor*2,
+            start[0] = m_centerPointDisplayPosition[0] + m_windowSize[0] / factor;
+            start[1] = 0;
+            start[2] = 0.01;
+            end[0] = m_centerPointDisplayPosition[0] + m_windowSize[0] / factor;
+            end[1] = -6;
+            end[2] = 0.01;
+            arrowTop2->DeepCopy(CreateArrow(length, start, end));
+            AssignScalarValueTo(arrowTop2, 0);
+            m_appenderTranslate->AddInputData(arrowTop2);
+            arrowTop2->GetPointData()->AddArray(m_colors[1]);
+
+	    m_cursorLines2[0]->SetPoint1(m_centerPointDisplayPosition[0] - m_windowSize[0] / factor*2000,
                                          m_centerPointDisplayPosition[1], 0.01);
             m_cursorLines2[0]->SetPoint2(m_centerPointDisplayPosition[0] - m_windowSize[0] / factor,
                                          m_centerPointDisplayPosition[1], 0.01);
             m_cursorLines2[0]->Update();
             m_cursorLines2[0]->GetOutput()->GetPointData()->AddArray(m_colors[1]);
 
-            m_cursorLines2[2]->SetPoint1(m_centerPointDisplayPosition[0] + m_windowSize[0] / factor * 2,
+            m_cursorLines2[2]->SetPoint1(m_centerPointDisplayPosition[0] + m_windowSize[0] / factor * 2000,
                                          m_centerPointDisplayPosition[1], 0.01);
             m_cursorLines2[2]->SetPoint2(m_centerPointDisplayPosition[0] + m_windowSize[0] / factor,
                                          m_centerPointDisplayPosition[1], 0.01);
@@ -130,9 +220,31 @@ void asclepios::gui::vtkResliceActor::update()
 	    m_cursorLines[1]->GetOutput()->GetPointData()->AddArray(m_colors[0]);
             AssignScalarValueTo(m_cursorLines[1]->GetOutput(), 1);
 
+            start[0] = m_centerPointDisplayPosition[0] + 6;
+            start[1] = m_centerPointDisplayPosition[1] - m_windowSize[1] / factor;
+            start[2] = 0.01;
+            end[0] = m_centerPointDisplayPosition[0];
+            end[1] = m_centerPointDisplayPosition[1] - m_windowSize[1] / factor;
+            end[2] = 0.01;
+            arrowLeft1->DeepCopy(CreateArrow(length, start, end));
+            AssignScalarValueTo(arrowLeft1, 0);
+            m_appenderTranslate->AddInputData(arrowLeft1);
+            arrowLeft1->GetPointData()->AddArray(m_colors[0]);
+
+            start[0] = m_centerPointDisplayPosition[0] + 6;
+            start[1] = m_centerPointDisplayPosition[1] + m_windowSize[1] / factor;
+            start[2] = 0.01;
+            end[0] = m_centerPointDisplayPosition[0];
+            end[1] = m_centerPointDisplayPosition[1] + m_windowSize[1] / factor;
+            end[2] = 0.01;
+            arrowLeft2->DeepCopy(CreateArrow(length, start, end));
+            AssignScalarValueTo(arrowLeft2, 0);
+            m_appenderTranslate->AddInputData(arrowLeft2);
+            arrowLeft2->GetPointData()->AddArray(m_colors[0]);
+
 
             m_cursorLines2[1]->SetPoint1(m_centerPointDisplayPosition[0],
-                                         m_centerPointDisplayPosition[0] - m_windowSize[1] / factor*2,
+                                         m_centerPointDisplayPosition[0] - m_windowSize[1] / factor * 2000,
                                          0.01);
             m_cursorLines2[1]->SetPoint2(m_centerPointDisplayPosition[0],
                                          m_centerPointDisplayPosition[0] - m_windowSize[1] / factor,
@@ -141,11 +253,13 @@ void asclepios::gui::vtkResliceActor::update()
             m_cursorLines2[1]->GetOutput()->GetPointData()->AddArray(m_colors[0]);
 
             m_cursorLines2[3]->SetPoint1(m_centerPointDisplayPosition[0],
-                                         m_centerPointDisplayPosition[0] + m_windowSize[1] / factor * 2, 0.01);
+                                         m_centerPointDisplayPosition[0] + m_windowSize[1] / factor * 2000, 0.01);
             m_cursorLines2[3]->SetPoint2(m_centerPointDisplayPosition[0],
                                          m_centerPointDisplayPosition[0] + m_windowSize[1] / factor, 0.01);
             m_cursorLines2[3]->Update();
             m_cursorLines2[3]->GetOutput()->GetPointData()->AddArray(m_colors[0]);
+
+
 
 	    m_actorTranslate->SetScale(5);
             m_actorRotate->SetScale(5);
@@ -169,7 +283,7 @@ void asclepios::gui::vtkResliceActor::createColors(double* t_color1, double* t_c
 		vtkSmartPointer<vtkUnsignedCharArray>::New();
 	m_colors[0]->SetName("Colors");
 	m_colors[0]->SetNumberOfComponents(3);
-	m_colors[0]->SetNumberOfTuples(100);
+	m_colors[0]->SetNumberOfTuples(1000);
 	for (auto j = 0; j < 100; j++)
 	{
 		m_colors[0]->InsertTuple3(j, t_color1[0],
@@ -179,7 +293,7 @@ void asclepios::gui::vtkResliceActor::createColors(double* t_color1, double* t_c
 		vtkSmartPointer<vtkUnsignedCharArray>::New();
 	m_colors[1]->SetName("Colors");
 	m_colors[1]->SetNumberOfComponents(3);
-	m_colors[1]->SetNumberOfTuples(100);
+	m_colors[1]->SetNumberOfTuples(1000);
 	for (auto j = 0; j < 100; j++)
 	{
 		m_colors[1]->InsertTuple3(j, t_color2[0],
