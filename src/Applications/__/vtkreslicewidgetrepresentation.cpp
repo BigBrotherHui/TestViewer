@@ -11,6 +11,10 @@
 #include <vtkRegularPolygonSource.h>
 #include <vtkMatrix4x4.h>
 #include <vtkTransform.h>
+#include <QDebug>
+#include <qmath.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkPointData.h>
 vtkStandardNewMacro(asclepios::gui::vtkResliceWidgetRepresentation);
 
 asclepios::gui::vtkResliceWidgetRepresentation::vtkResliceWidgetRepresentation()
@@ -52,7 +56,7 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 		!= vtkHandleRepresentation::Outside)
 	{
 		return handleCursor;
-	};
+	}
 	vtkNew<vtkCellPicker> picker;
 	picker->SetTolerance(0.01);
 	picker->InitializePickList();
@@ -62,7 +66,16 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 	if (picker->Pick(X, Y, 0, Renderer))
 	{
             if (picker->GetActor() == m_cursorActor->getActorTranslate()) {
-                return translateCursor;
+		auto id=picker->GetPointId();
+		auto v = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
+									->GetInput()
+									->GetPointData()
+									->GetScalars()
+									->GetTuple1(id);
+	        if(v==0)
+                    return translateCursorHor;
+	        else 
+		    return translateCursorVer;
             }
             else if (picker->GetActor() == m_cursorActor->getActorRotate()) {
                 return rotateCursor;
@@ -158,7 +171,7 @@ int asclepios::gui::vtkResliceWidgetRepresentation::RenderOpaqueGeometry(
 //-----------------------------------------------------------------------------
 int asclepios::gui::vtkResliceWidgetRepresentation::HasTranslucentPolygonalGeometry()
 {
-	BuildRepresentation();
+    BuildRepresentation();
     return m_cursorActor->getActorTranslate()
                    ? m_cursorActor->getActorTranslate()->HasTranslucentPolygonalGeometry()
 		       : 0;
@@ -167,9 +180,10 @@ int asclepios::gui::vtkResliceWidgetRepresentation::HasTranslucentPolygonalGeome
 //-----------------------------------------------------------------------------
 void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double t_angle)
 {
-     m_rotationAngle += t_angle;
-     m_cursorActor->getActorRotate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
-     m_cursorActor->getActorTranslate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
+    m_rotationAngle += t_angle;
+    //m_rotationAngle = fmod(m_rotationAngle, M_PI / 4);
+    m_cursorActor->getActorRotate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
+    m_cursorActor->getActorTranslate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
 }
 
 void asclepios::gui::vtkResliceWidgetRepresentation::reset(){
@@ -178,14 +192,17 @@ void asclepios::gui::vtkResliceWidgetRepresentation::reset(){
 
 void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double y,double z, char moveAxes)
 {
-    std::cout << "**********" << m_rotationAngle << std::endl;
     if (moveAxes == 1) {
-        y = x * tan(m_rotationAngle);
-        m_cursorActor->getActorTranslate()->AddPosition(x,y, 0);
+        double nx = x * cos(m_rotationAngle) + y * sin(m_rotationAngle);
+		x = nx * cos(m_rotationAngle);  
+        y = nx * sin(m_rotationAngle);
+        m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
         m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
     }   
     else {
-        x=-y / cos(m_rotationAngle)*sin(m_rotationAngle);
+        double ny = x * -sin(m_rotationAngle) + y * cos(m_rotationAngle);
+        x = -ny * sin(m_rotationAngle);
+        y = ny * cos(m_rotationAngle);
         m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
         m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
     }
@@ -195,11 +212,23 @@ void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double 
 void asclepios::gui::vtkResliceWidgetRepresentation::setPlane(const int t_plane)
 {
 	m_plane = t_plane;
-	double verticalColor[3] = {3, 218, 198};
-	double horizontalColor[3] = {3, 218, 198};
 	if (m_cursorActor)
 	{
-		m_cursorActor->createColors(verticalColor, horizontalColor);
+		if(t_plane==0){
+			double verticalColor[3] = {170, 255, 190};
+			double horizontalColor[3] = {255, 160, 190};
+			m_cursorActor->createColors(verticalColor, horizontalColor);
+		}
+		else if(t_plane==1){
+			double verticalColor[3] = {255, 160, 190};
+			double horizontalColor[3] = {255, 250, 160};
+			m_cursorActor->createColors(verticalColor, horizontalColor);
+		}
+		else{
+			double verticalColor[3] = {170, 255, 190};
+			double horizontalColor[3] = {255, 250, 160};
+			m_cursorActor->createColors(verticalColor, horizontalColor);
+		}
 	}
 }
 

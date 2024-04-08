@@ -32,7 +32,7 @@ namespace asclepios::gui
 
 		void initializeWidget();
 
-		enum widgetState { start = 0, rotate, translate, thickness_horizontal, thickness_vertical };
+		enum widgetState { start = 0, rotate, translate,bothTranslate, thickness_horizontal, thickness_vertical };
 
 	protected:
 		int m_state = 0;
