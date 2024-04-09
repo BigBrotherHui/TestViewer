@@ -15,6 +15,7 @@
 #include <qmath.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkPointData.h>
+#include <vtkPoints.h>
 vtkStandardNewMacro(asclepios::gui::vtkResliceWidgetRepresentation);
 
 asclepios::gui::vtkResliceWidgetRepresentation::vtkResliceWidgetRepresentation()
@@ -55,7 +56,7 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 	if (m_centerMovementPointRepresentation->ComputeInteractionState(X, Y)
 		!= vtkHandleRepresentation::Outside)
 	{
-		return handleCursor;
+		return VTK_CURSOR_SIZEALL;
 	}
 	vtkNew<vtkCellPicker> picker;
 	picker->SetTolerance(0.01);
@@ -72,16 +73,41 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 									->GetPointData()
 									->GetScalars()
 									->GetTuple1(id);
-	        if(v==0)
-                    return translateCursorHor;
-	        else 
-		    return translateCursorVer;
+                if (v == 0) {
+                    double angle = fmod(m_rotationAngle * 180 / M_PI,180);
+                    if ((fabs(angle) > 180.0 - 22.5) || (fabs(angle) < 22.5)) {
+                        return VTK_CURSOR_SIZENS;
+                    }
+                    if (fabs(fabs(angle) - 90.0) < 22.5) {
+                        return VTK_CURSOR_SIZEWE;
+                    }
+                    if ((fabs(angle - 135.0) < 22.5) || (fabs(angle + 45.0) < 22.5)) {
+                        return VTK_CURSOR_SIZENE;
+                    }
+                    return VTK_CURSOR_SIZENW;
+                }
+                else if (v == 1) {
+                    double angle = fmod(m_rotationAngle * 180 / M_PI+90, 180);
+                    if ((fabs(angle) > 180.0 - 22.5) || (fabs(angle) < 22.5)) {
+                        return VTK_CURSOR_SIZENS;
+                    }
+                    if (fabs(fabs(angle) - 90.0) < 22.5) {
+                        return VTK_CURSOR_SIZEWE;
+                    }
+                    if ((fabs(angle - 135.0) < 22.5) || (fabs(angle + 45.0) < 22.5)) {
+                        return VTK_CURSOR_SIZENE;
+                    }
+                    return VTK_CURSOR_SIZENW;
+                }
+                else {
+                    return VTK_CURSOR_DEFAULT;
+                }    
             }
             else if (picker->GetActor() == m_cursorActor->getActorRotate()) {
-                return rotateCursor;
+                return VTK_CURSOR_HAND;
             }
 	}
-	return outside;
+        return VTK_CURSOR_DEFAULT;
 }
 
 //-----------------------------------------------------------------------------

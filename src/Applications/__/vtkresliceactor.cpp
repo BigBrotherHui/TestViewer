@@ -16,6 +16,7 @@
 #include <vtkTransform.h>
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkMinimalStandardRandomSequence.h>
+#include <vtkLine.h>
 vtkStandardNewMacro(asclepios::gui::vtkResliceActor);
 namespace {
 void AssignScalarValueTo(vtkPolyData* polydata, char value)
@@ -99,66 +100,106 @@ void asclepios::gui::vtkResliceActor::setCenterPosition(const double* t_center)
 	m_centerPointDisplayPosition[2] = t_center[2];
 }
 
-vtkSmartPointer<vtkPolyData> CreateArrow(double& pdLength, std::array<double, 3>& startPoint,
+vtkSmartPointer<vtkPolyData> CreateArrow(bool leftforward, std::array<double, 3>& startPoint,
                                          std::array<double, 3>& endPoint)
 {
-    vtkSmartPointer<vtkPolyData> polyData;
-
-    // Create an arrow.
-    vtkNew<vtkArrowSource> arrowSource;
-    arrowSource->SetShaftRadius(pdLength * .01);
-    arrowSource->SetShaftResolution(20);
-    arrowSource->SetTipLength(pdLength * .1);
-    arrowSource->SetTipRadius(pdLength * .05);
-    arrowSource->SetTipResolution(20);
-
-    // Compute a basis
-    std::array<double, 3> normalizedX;
-    std::array<double, 3> normalizedY;
-    std::array<double, 3> normalizedZ;
-
-    // The X axis is a vector from start to end
-    vtkMath::Subtract(endPoint.data(), startPoint.data(), normalizedX.data());
-    double length = vtkMath::Norm(normalizedX.data());
-    vtkMath::Normalize(normalizedX.data());
-
-    // The Z axis is an arbitrary vector cross X
-    vtkNew<vtkMinimalStandardRandomSequence> rng;
-    rng->SetSeed(8775070);
-
-    std::array<double, 3> arbitrary;
-    for (auto i = 0; i < 3; ++i) {
-        rng->Next();
-        arbitrary[i] = rng->GetRangeValue(-10, 10);
+    vtkSmartPointer<vtkPolyData> ret = vtkSmartPointer<vtkPolyData>::New();
+    vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+    double leftSide[3], rightSide[3];
+    int offset = 1;
+    if (leftforward) {
+        leftSide[0] = endPoint[0] - offset;
+        leftSide[1] = endPoint[1] + offset;
+        leftSide[2] = endPoint[2];
+        rightSide[0] = endPoint[0] + offset;
+        rightSide[1] = endPoint[1] + offset;
+        rightSide[2] = endPoint[2];
     }
-    vtkMath::Cross(normalizedX.data(), arbitrary.data(), normalizedZ.data());
-    vtkMath::Normalize(normalizedZ.data());
-
-    // The Y axis is Z cross X
-    vtkMath::Cross(normalizedZ.data(), normalizedX.data(), normalizedY.data());
-    vtkNew<vtkMatrix4x4> matrix;
-
-    // Create the direction cosine matrix
-    matrix->Identity();
-    for (auto i = 0; i < 3; i++) {
-        matrix->SetElement(i, 0, normalizedX[i]);
-        matrix->SetElement(i, 1, normalizedY[i]);
-        matrix->SetElement(i, 2, normalizedZ[i]);
+    else {
+        leftSide[0] = endPoint[0] + offset;
+        leftSide[1] = endPoint[1] + offset;
+        leftSide[2] = endPoint[2];
+        rightSide[0] = endPoint[0] + offset;
+        rightSide[1] = endPoint[1] - offset;
+        rightSide[2] = endPoint[2];
     }
+    points->InsertNextPoint(startPoint.data());
+    points->InsertNextPoint(endPoint.data());
+    points->InsertNextPoint(leftSide);
+    points->InsertNextPoint(rightSide);
+    vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+    vtkSmartPointer<vtkLine> line0 = vtkSmartPointer<vtkLine>::New();
+    line0->GetPointIds()->SetId(0,0);
+    line0->GetPointIds()->SetId(1, 1);
+    vtkSmartPointer<vtkLine> line1 = vtkSmartPointer<vtkLine>::New();
+    line1->GetPointIds()->SetId(0, 1);
+    line1->GetPointIds()->SetId(1, 2);
+    vtkSmartPointer<vtkLine> line2 = vtkSmartPointer<vtkLine>::New();
+    line2->GetPointIds()->SetId(0, 1);
+    line2->GetPointIds()->SetId(1, 3);
+    lines->InsertNextCell(line0);
+    lines->InsertNextCell(line1);
+    lines->InsertNextCell(line2);
+    ret->SetPoints(points);
+    ret->SetLines(lines);
+    return ret;
+    //vtkSmartPointer<vtkPolyData> polyData;
 
-    // Apply the transforms
-    vtkNew<vtkTransform> transform;
-    transform->Translate(startPoint.data());
-    transform->Concatenate(matrix);
-    transform->Scale(length, length, length);
+    //// Create an arrow.
+    //vtkNew<vtkArrowSource> arrowSource;
+    //arrowSource->SetShaftRadius(pdLength * .01);
+    //arrowSource->SetShaftResolution(20);
+    //arrowSource->SetTipLength(pdLength * .1);
+    //arrowSource->SetTipRadius(pdLength * .05);
+    //arrowSource->SetTipResolution(20);
 
-    // Transform the polydata
-    vtkNew<vtkTransformPolyDataFilter> transformPD;
-    transformPD->SetTransform(transform);
-    transformPD->SetInputConnection(arrowSource->GetOutputPort());
-    transformPD->Update();
-    polyData = transformPD->GetOutput();
-    return polyData;
+    //// Compute a basis
+    //std::array<double, 3> normalizedX;
+    //std::array<double, 3> normalizedY;
+    //std::array<double, 3> normalizedZ;
+
+    //// The X axis is a vector from start to end
+    //vtkMath::Subtract(endPoint.data(), startPoint.data(), normalizedX.data());
+    //double length = vtkMath::Norm(normalizedX.data());
+    //vtkMath::Normalize(normalizedX.data());
+
+    //// The Z axis is an arbitrary vector cross X
+    //vtkNew<vtkMinimalStandardRandomSequence> rng;
+    //rng->SetSeed(8775070);
+
+    //std::array<double, 3> arbitrary;
+    //for (auto i = 0; i < 3; ++i) {
+    //    rng->Next();
+    //    arbitrary[i] = rng->GetRangeValue(-10, 10);
+    //}
+    //vtkMath::Cross(normalizedX.data(), arbitrary.data(), normalizedZ.data());
+    //vtkMath::Normalize(normalizedZ.data());
+
+    //// The Y axis is Z cross X
+    //vtkMath::Cross(normalizedZ.data(), normalizedX.data(), normalizedY.data());
+    //vtkNew<vtkMatrix4x4> matrix;
+
+    //// Create the direction cosine matrix
+    //matrix->Identity();
+    //for (auto i = 0; i < 3; i++) {
+    //    matrix->SetElement(i, 0, normalizedX[i]);
+    //    matrix->SetElement(i, 1, normalizedY[i]);
+    //    matrix->SetElement(i, 2, normalizedZ[i]);
+    //}
+
+    //// Apply the transforms
+    //vtkNew<vtkTransform> transform;
+    //transform->Translate(startPoint.data());
+    //transform->Concatenate(matrix);
+    //transform->Scale(length, length, length);
+
+    //// Transform the polydata
+    //vtkNew<vtkTransformPolyDataFilter> transformPD;
+    //transformPD->SetTransform(transform);
+    //transformPD->SetInputConnection(arrowSource->GetOutputPort());
+    //transformPD->Update();
+    //polyData = transformPD->GetOutput();
+    //return polyData;
 }
 //-----------------------------------------------------------------------------
 void asclepios::gui::vtkResliceActor::update()
@@ -180,9 +221,8 @@ void asclepios::gui::vtkResliceActor::update()
             end[0] = m_centerPointDisplayPosition[0] - m_windowSize[0] / factor;
             end[1] = -6;
             end[2] = 0.01;
-            double length = 2;
-            arrowTop1->DeepCopy(CreateArrow(length, start, end));
-            AssignScalarValueTo(arrowTop1, 0);
+            arrowTop1->DeepCopy(CreateArrow(true, start, end));
+            AssignScalarValueTo(arrowTop1, 10);
             m_appenderTranslate->AddInputData(arrowTop1);
             arrowTop1->GetPointData()->AddArray(m_colors[1]);
 
@@ -192,8 +232,8 @@ void asclepios::gui::vtkResliceActor::update()
             end[0] = m_centerPointDisplayPosition[0] + m_windowSize[0] / factor;
             end[1] = -6;
             end[2] = 0.01;
-            arrowTop2->DeepCopy(CreateArrow(length, start, end));
-            AssignScalarValueTo(arrowTop2, 0);
+            arrowTop2->DeepCopy(CreateArrow(true, start, end));
+            AssignScalarValueTo(arrowTop2, 10);
             m_appenderTranslate->AddInputData(arrowTop2);
             arrowTop2->GetPointData()->AddArray(m_colors[1]);
 
@@ -226,8 +266,8 @@ void asclepios::gui::vtkResliceActor::update()
             end[0] = m_centerPointDisplayPosition[0];
             end[1] = m_centerPointDisplayPosition[1] - m_windowSize[1] / factor;
             end[2] = 0.01;
-            arrowLeft1->DeepCopy(CreateArrow(length, start, end));
-            AssignScalarValueTo(arrowLeft1, 1);
+            arrowLeft1->DeepCopy(CreateArrow(false, start, end));
+            AssignScalarValueTo(arrowLeft1, 10);
             m_appenderTranslate->AddInputData(arrowLeft1);
             arrowLeft1->GetPointData()->AddArray(m_colors[0]);
 
@@ -237,8 +277,8 @@ void asclepios::gui::vtkResliceActor::update()
             end[0] = m_centerPointDisplayPosition[0];
             end[1] = m_centerPointDisplayPosition[1] + m_windowSize[1] / factor;
             end[2] = 0.01;
-            arrowLeft2->DeepCopy(CreateArrow(length, start, end));
-            AssignScalarValueTo(arrowLeft2, 1);
+            arrowLeft2->DeepCopy(CreateArrow(false, start, end));
+            AssignScalarValueTo(arrowLeft2, 10);
             m_appenderTranslate->AddInputData(arrowLeft2);
             arrowLeft2->GetPointData()->AddArray(m_colors[0]);
 
@@ -283,7 +323,7 @@ void asclepios::gui::vtkResliceActor::createColors(double* t_color1, double* t_c
 		vtkSmartPointer<vtkUnsignedCharArray>::New();
 	m_colors[0]->SetName("Colors");
 	m_colors[0]->SetNumberOfComponents(3);
-	m_colors[0]->SetNumberOfTuples(1000);
+	m_colors[0]->SetNumberOfTuples(100);
 	for (auto j = 0; j < 100; j++)
 	{
 		m_colors[0]->InsertTuple3(j, t_color1[0],
@@ -293,7 +333,7 @@ void asclepios::gui::vtkResliceActor::createColors(double* t_color1, double* t_c
 		vtkSmartPointer<vtkUnsignedCharArray>::New();
 	m_colors[1]->SetName("Colors");
 	m_colors[1]->SetNumberOfComponents(3);
-	m_colors[1]->SetNumberOfTuples(1000);
+	m_colors[1]->SetNumberOfTuples(100);
 	for (auto j = 0; j < 100; j++)
 	{
 		m_colors[1]->InsertTuple3(j, t_color2[0],

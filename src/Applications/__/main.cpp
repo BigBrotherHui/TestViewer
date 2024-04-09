@@ -15,13 +15,13 @@ VTK_MODULE_INIT(vtkRenderingVolumeOpenGL2);
 #include <vtkSmartPointer.h>
 int main(int argc, char* argv[])
 {
-	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-	QApplication application(argc, argv);
-	//vtkObject::GlobalWarningDisplayOff();
-	application.setWindowIcon(QIcon(iconapp));
-	asclepios::gui::GUIFrame guiFrame;
-	asclepios::gui::GUI gui;
-	guiFrame.setContent(&gui);
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication application(argc, argv);
+    //vtkObject::GlobalWarningDisplayOff();
+    application.setWindowIcon(QIcon(iconapp));
+    asclepios::gui::GUIFrame guiFrame;
+    asclepios::gui::GUI gui;
+    guiFrame.setContent(&gui);
     guiFrame.show();
-	return application.exec();
+    return application.exec();
 }

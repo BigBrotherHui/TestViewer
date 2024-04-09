@@ -349,26 +349,27 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::SetCursor(int t_state)
 	{
 		return;
 	}
-	switch (t_state)
-	{
-	case vtkResliceWidgetRepresentation::outside:
-		RequestCursorShape(VTK_CURSOR_DEFAULT);
-		break;
-	case vtkResliceWidgetRepresentation::translateCursorHor:
-		RequestCursorShape(VTK_CURSOR_SIZENS);
-		break;
-	case vtkResliceWidgetRepresentation::translateCursorVer:
-		RequestCursorShape(VTK_CURSOR_SIZEWE);
-		break;
-	case vtkResliceWidgetRepresentation::rotateCursor:
-		RequestCursorShape(VTK_CURSOR_HAND);
-		break;
-	case vtkResliceWidgetRepresentation::handleCursor:
-		RequestCursorShape(VTK_CURSOR_SIZEALL);
-		break;
-	default:
-		RequestCursorShape(VTK_CURSOR_DEFAULT);
-	}
+	RequestCursorShape(t_state);
+	// switch (t_state)
+	// {
+	// case vtkResliceWidgetRepresentation::outside:
+	// 	RequestCursorShape(VTK_CURSOR_DEFAULT);
+	// 	break;
+	// case vtkResliceWidgetRepresentation::translateCursorHor:
+	// 	RequestCursorShape(VTK_CURSOR_SIZENS);
+	// 	break;
+	// case vtkResliceWidgetRepresentation::translateCursorVer:
+	// 	RequestCursorShape(VTK_CURSOR_SIZEWE);
+	// 	break;
+	// case vtkResliceWidgetRepresentation::rotateCursor:
+	// 	RequestCursorShape(VTK_CURSOR_HAND);
+	// 	break;
+	// case vtkResliceWidgetRepresentation::handleCursor:
+	// 	RequestCursorShape(VTK_CURSOR_SIZEALL);
+	// 	break;
+	// default:
+	// 	RequestCursorShape(VTK_CURSOR_DEFAULT);
+	// }
 }
 
 //-----------------------------------------------------------------------------
