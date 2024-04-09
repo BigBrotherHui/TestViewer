@@ -16,6 +16,7 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkPointData.h>
 #include <vtkPoints.h>
+#include "vtkAlgorithm.h"
 vtkStandardNewMacro(asclepios::gui::vtkResliceWidgetRepresentation);
 
 asclepios::gui::vtkResliceWidgetRepresentation::vtkResliceWidgetRepresentation()
@@ -66,7 +67,7 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 	picker->AddPickList(m_cursorActor->getActorRotate());
 	if (picker->Pick(X, Y, 0, Renderer))
 	{
-            if (picker->GetActor() == m_cursorActor->getActorTranslate()) {
+        if (picker->GetActor() == m_cursorActor->getActorTranslate()) {
 		auto id=picker->GetPointId();
 		auto v = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
 									->GetInput()
@@ -74,30 +75,10 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 									->GetScalars()
 									->GetTuple1(id);
                 if (v == 0) {
-                    double angle = fmod(m_rotationAngle * 180 / M_PI,180);
-                    if ((fabs(angle) > 180.0 - 22.5) || (fabs(angle) < 22.5)) {
-                        return VTK_CURSOR_SIZENS;
-                    }
-                    if (fabs(fabs(angle) - 90.0) < 22.5) {
-                        return VTK_CURSOR_SIZEWE;
-                    }
-                    if ((fabs(angle - 135.0) < 22.5) || (fabs(angle + 45.0) < 22.5)) {
-                        return VTK_CURSOR_SIZENE;
-                    }
-                    return VTK_CURSOR_SIZENW;
+                    return calculateCursorState(m_rotationAngle * 180 / M_PI);
                 }
                 else if (v == 1) {
-                    double angle = fmod(m_rotationAngle * 180 / M_PI+90, 180);
-                    if ((fabs(angle) > 180.0 - 22.5) || (fabs(angle) < 22.5)) {
-                        return VTK_CURSOR_SIZENS;
-                    }
-                    if (fabs(fabs(angle) - 90.0) < 22.5) {
-                        return VTK_CURSOR_SIZEWE;
-                    }
-                    if ((fabs(angle - 135.0) < 22.5) || (fabs(angle + 45.0) < 22.5)) {
-                        return VTK_CURSOR_SIZENE;
-                    }
-                    return VTK_CURSOR_SIZENW;
+                    return calculateCursorState(m_rotationAngle * 180 / M_PI + 90);
                 }
                 else {
                     return VTK_CURSOR_DEFAULT;
@@ -107,7 +88,7 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
                 return VTK_CURSOR_HAND;
             }
 	}
-        return VTK_CURSOR_DEFAULT;
+    return VTK_CURSOR_DEFAULT;
 }
 
 //-----------------------------------------------------------------------------
@@ -219,16 +200,12 @@ void asclepios::gui::vtkResliceWidgetRepresentation::reset(){
 void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double y,double z, char moveAxes)
 {
     if (moveAxes == 1) {
-        double nx = x * cos(m_rotationAngle) + y * sin(m_rotationAngle);
-		x = nx * cos(m_rotationAngle);  
-        y = nx * sin(m_rotationAngle);
+        calculateTranslateX(x, y, m_rotationAngle);
         m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
         m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
     }   
     else {
-        double ny = x * -sin(m_rotationAngle) + y * cos(m_rotationAngle);
-        x = -ny * sin(m_rotationAngle);
-        y = ny * cos(m_rotationAngle);
+        calculateTranslateY(x, y, m_rotationAngle);
         m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
         m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
     }
