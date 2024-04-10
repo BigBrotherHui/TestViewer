@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(Viewer LANGUAGES CXX)
+project(Asclepios-DICOM-Viewer_Modified LANGUAGES CXX)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

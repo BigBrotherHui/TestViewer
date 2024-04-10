@@ -34,7 +34,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR}/lib/${CMAKE_GENERATOR_PLATFORM}/$<CONFIGURATION>
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Applications/demos")
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Widgets Qt5::Core Qt5::Concurrent ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${DCMTK_LIBRARIES} Core
 )
