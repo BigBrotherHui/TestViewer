@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
-project(testviewer LANGUAGES CXX)
+get_filename_component(TEST_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+project(${TEST_NAME} LANGUAGES CXX)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -33,7 +34,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR}/lib/${CMAKE_GENERATOR_PLATFORM}/$<CONFIGURATION>
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Applications")
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Applications/demos")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Widgets Qt5::Core Qt5::Concurrent ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${DCMTK_LIBRARIES} Core
 )

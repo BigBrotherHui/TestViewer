@@ -50,9 +50,11 @@ public:
                 int deltaX = lastPos[0] - currPos[0];
 
                 // reslice->Update();
+                //注意这里获取的sliceSpacing并不是z轴的spacing而是与当前slice的面垂直的那个方向的spacing，比如axial就是spacing[2]，
+                //如果是sagittal或是coronal就是spacing[0]和spacing[1]
                 double sliceSpacing = reslice->GetOutput()->GetSpacing()[2];
-                qDebug() << reslice->GetOutput()->GetSpacing()[0] << reslice->GetOutput()->GetSpacing()[1]
-                         << reslice->GetOutput()->GetSpacing()[2];
+                /*qDebug() << reslice->GetOutput()->GetSpacing()[0] << reslice->GetOutput()->GetSpacing()[1]
+                         << reslice->GetOutput()->GetSpacing()[2];*/
                 vtkMatrix4x4 *matrix = reslice->GetResliceAxes();
                 //重新定位切片需要经过的中心点
                 double point[4];

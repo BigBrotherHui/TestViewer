@@ -4,6 +4,3 @@ foreach(subdir ${SUBDIRS})
         add_subdirectory(${subdir})
     endif()
 endforeach()
-
-option(Applications_BUILD_demos "Enable Build Demos" ON)
-mark_as_advanced(Applications_BUILD_demos)
