@@ -9,7 +9,7 @@ VTK_MODULE_INIT(vtkRenderingVolumeOpenGL2)
 int main(int argc, char *argv[])
 {
 	//ignore global warning window
-	vtkOutputWindow::GlobalWarningDisplayOff();
+    vtkOutputWindow::GlobalWarningDisplayOff();
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

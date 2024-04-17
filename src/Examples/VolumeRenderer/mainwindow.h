@@ -56,9 +56,7 @@
 namespace Ui {
 class MainWindow;
 }
-
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
     
 public:
@@ -78,14 +76,13 @@ private:
 
 
 private slots:
-	void on_action_Exit_triggered();
-	void on_action_About_triggered();
-	void on_action_Open_triggered();
+    void on_action_Exit_triggered();
+    void on_action_About_triggered();
+    void on_action_Open_triggered();
     void on_action_vtkSlicerGPURayCastVolumeMapper_triggered();
     void on_action_vtkGPUVolumeRayCastMapper_triggered();
-	void on_action_vtkSmartVolumeMapper_triggered();
-
-
+    void on_action_vtkSmartVolumeMapper_triggered();
+private:
 };
 
 #endif // MAINWINDOW_H

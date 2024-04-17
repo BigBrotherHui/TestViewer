@@ -7,11 +7,12 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-tidyFolder(FALSE)
+find_package(Qt5Core REQUIRED)
+find_package(VTK REQUIRED)
+tidyFolder()
 
-find_package(Qt5 REQUIRED COMPONENTS Core)
 
-add_library(${PROJECT_NAME} SHARED vtkAlgorithm.cpp)
+add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
 if(NOT MODULE_EXPORT_DEFINE)
     set(MODULE_EXPORT_DEFINE ${PROJECT_NAME}_EXPORT)
@@ -40,4 +41,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Modules")
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core ${VTK_LIBRARIES})

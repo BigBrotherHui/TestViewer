@@ -1,30 +1,24 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.6)
 
-project(VolumeRenderer)
+PROJECT(BoolTest)
 
-find_package(OpenGL REQUIRED)
-find_package(CTK REQUIRED)
-
-# VTK is required
-find_package(VTK REQUIRED)
-
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-find_package(Qt5 REQUIRED Core Widgets OpenGL Xml UiTools XmlPatterns Concurrent Script)
-# Use the compile definitions defined in the Qt 5 Widgets module
+FIND_PACKAGE(VTK REQUIRED)
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets Core)
+find_package(Eigen3 REQUIRED)
 tidyFolder()
-include_directories(${CTK_INCLUDE_DIRS})
-include_directories(${CMAKE_SOURCE_DIR}/include)
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+ADD_EXECUTABLE(${PROJECT_NAME} ${PROJECT_SOURCES}
+)
+include_directories(${EIGEN3_INCLUDE_DIR})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE ${VTK_LIBRARIES} Qt5::Widgets Qt5::Core Eigen3::Eigen Algorithm)
+
 set(target_directory "Examples")
-#���ú��������¼�
+#设置后期生成事件
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND cmd /c "${CMAKE_BINARY_DIR}/postEvent.bat $(SolutionDir) $(SolutionName) $(ProjectDir) $(ProjectName) $(Platform) $(Configuration) $(TargetExt) ${target_directory}"
 )
 else()
-    # ����ϵͳ�Ĳ���
+    # 其他系统的操作
     # ...
 endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -32,12 +26,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR}/lib/${CMAKE_GENERATOR_PLATFORM}/$<CONFIGURATION>
 	LIBRARY_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR}/lib/${CMAKE_GENERATOR_PLATFORM}/$<CONFIGURATION>
 )
-# ���� Visual Studio ��Ŀ�ļ�ʱ�����õ���·��
+# 生成 Visual Studio 项目文件时，设置调试路径
 if (CMAKE_GENERATOR MATCHES "Visual Studio")
     set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_COMMAND ${CMAKE_BINARY_DIR}/bin/${CMAKE_GENERATOR_PLATFORM}/$<CONFIGURATION>/${target_directory}/${PROJECT_NAME}.exe)
     set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_GENERATOR_PLATFORM}/$<CONFIGURATION>/${target_directory})
 endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER ${target_directory})
-# Use the Widgets module from Qt 5.
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::OpenGL Qt5::Xml Qt5::UiTools Qt5::XmlPatterns Qt5::Concurrent Qt5::Script
-${VTK_LIBRARIES} ${OPENGL_LIBRARIES} ${CTK_LIBRARIES})
+

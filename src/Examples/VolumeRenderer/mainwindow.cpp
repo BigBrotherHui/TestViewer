@@ -8,17 +8,17 @@ static void FPSCallback(vtkObject* caller, long unsigned int eventId,
 
 void FPSCallback(vtkObject* caller, long unsigned int eventId, void* clientData, void* callData)
 {
-	vtkRenderer* renderer = static_cast<vtkRenderer*>(caller);
+    vtkRenderer* renderer = static_cast<vtkRenderer*>(caller);
 
-	double timeInSeconds = renderer->GetLastRenderTimeInSeconds();
-	double fps = 1.0 / timeInSeconds;
-	//convert void* clientData to fps QLabel
-	QLabel * fpsp = (QLabel *)(clientData);
-	fpsp->setText("FPS:"+QString::number(fps, 10, 2));
-	if(fps<60)
-		fpsp->setStyleSheet("color:red;");
-	else
-		fpsp->setStyleSheet("color:black;");
+    double timeInSeconds = renderer->GetLastRenderTimeInSeconds();
+    double fps = 1.0 / timeInSeconds;
+    //convert void* clientData to fps QLabel
+    QLabel * fpsp = (QLabel *)(clientData);
+    fpsp->setText("FPS:"+QString::number(fps, 10, 2));
+    if(fps<60)
+	    fpsp->setStyleSheet("color:red;");
+    else
+	    fpsp->setStyleSheet("color:black;");
 }
 
 
@@ -28,9 +28,9 @@ static void PropertyCallback(vtkObject* caller, long unsigned int eventId,
 
 void PropertyCallback(vtkObject* caller, long unsigned int eventId, void* clientData, void* callData)
 {
-	//std::cout << "PropertyCallback"<<std::endl;
-	QVTKOpenGLNativeWidget* wp = (QVTKOpenGLNativeWidget*)(clientData);
-	wp->GetRenderWindow()->Render();
+    //std::cout << "PropertyCallback"<<std::endl;
+    QVTKOpenGLNativeWidget* wp = (QVTKOpenGLNativeWidget*)(clientData);
+    wp->GetRenderWindow()->Render();
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -39,20 +39,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	
     ui->setupUi(this);
+    // add VTK widgets
+    ui->verticalLayout->addWidget(&widget);
+    ui->verticalLayout_2->addWidget(&fps_label);
+    ui->verticalLayout_2->addWidget(&volumePropertywidget);
 
-	// add VTK widgets
-	ui->verticalLayout->addWidget(&widget);
-	ui->verticalLayout_2->addWidget(&fps_label);
-	ui->verticalLayout_2->addWidget(&volumePropertywidget);
+    // set up interactor
+    interactor = widget.interactor();
+    vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderwindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+    widget.setRenderWindow(renderwindow);
 
-	// set up interactor
-	interactor = widget.interactor();
-	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderwindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-	widget.setRenderWindow(renderwindow);
-
-	// allow the user to interactively manipulate (rotate, pan, etc.) the camera, the viewpoint of the scene.
-	auto style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
-	interactor->SetInteractorStyle(style);
+    // allow the user to interactively manipulate (rotate, pan, etc.) the camera, the viewpoint of the scene.
+    auto style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+    interactor->SetInteractorStyle(style);
 }
 
 MainWindow::~MainWindow()
@@ -117,9 +116,9 @@ void MainWindow::on_action_Open_triggered()
 	reader->Update();
 #endif
 	// scale the volume data to unsigned char (0-255) before passing it to volume mapper
-	//auto shiftScale = vtkSmartPointer<vtkImageShiftScale>::New();
-	//shiftScale->SetInputConnection(reader->GetOutputPort());
-	//shiftScale->SetOutputScalarTypeToUnsignedChar();
+	auto shiftScale = vtkSmartPointer<vtkImageShiftScale>::New();
+	shiftScale->SetInputConnection(reader->GetOutputPort());
+	shiftScale->SetOutputScalarTypeToUnsignedChar();
 	// Create transfer mapping scalar value to opacity.
 	auto opacityTransferFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
 	opacityTransferFunction->AddPoint(0.0, 0.0);
@@ -133,7 +132,7 @@ void MainWindow::on_action_Open_triggered()
 
 	// Create transfer mapping scalar value to color.
 	auto colorTransferFunction = vtkSmartPointer<vtkColorTransferFunction>::New();
-	colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
+	colorTransferFunction->AddRGBPoint(0.0, 1.0, 1.0, 1.0);
 	colorTransferFunction->AddRGBPoint(36.0, 1.0, 0.0, 0.0);
 	colorTransferFunction->AddRGBPoint(72.0, 1.0, 1.0, 0.0);
 	colorTransferFunction->AddRGBPoint(108.0, 0.0, 1.0, 0.0);
@@ -144,10 +143,15 @@ void MainWindow::on_action_Open_triggered()
 
 	// set up volume property
 	auto volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
-	volumeProperty->SetColor(colorTransferFunction);
+	//volumeProperty->SetColor(colorTransferFunction);
 	volumeProperty->SetScalarOpacity(opacityTransferFunction);
 	volumeProperty->ShadeOff();
 	volumeProperty->SetInterpolationTypeToLinear();
+
+        auto gradientOpacityTransferFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
+        gradientOpacityTransferFunction->AddPoint(4, 0);
+        gradientOpacityTransferFunction->AddPoint(255, 1);
+        volumeProperty->SetGradientOpacity(0, gradientOpacityTransferFunction);
 	//volumeProperty->
 
 
@@ -163,14 +167,14 @@ void MainWindow::on_action_Open_triggered()
 	//else
 	if(ui->action_vtkGPUVolumeRayCastMapper->isChecked())
 	{
-		volumeMapper = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();//gpu
+	    volumeMapper = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();//gpu
 	}
 	else
 	{
-		volumeMapper  = vtkSmartPointer<vtkSmartVolumeMapper>::New(); //cpu or gpu
+	    volumeMapper  = vtkSmartPointer<vtkSmartVolumeMapper>::New(); //cpu or gpu
 	}
-	volumeMapper->SetInputConnection(reader->GetOutputPort());
-	volumeMapper->SetBlendModeToAdditive();
+        volumeMapper->SetInputConnection(shiftScale->GetOutputPort());
+	volumeMapper->SetBlendModeToComposite();
 	// The volume holds the mapper and the property and can be used to position/orient the volume.
 	auto volume = vtkSmartPointer<vtkVolume>::New();
 	this->currentVolume = volume;
@@ -182,8 +186,8 @@ void MainWindow::on_action_Open_triggered()
 	renderer->AddVolume(volume);
 	renderer->SetBackground(
 		RENDERER_BACKGROUND_R,
-		RENDERER_BACKGROUND_R,
-		RENDERER_BACKGROUND_R);
+		RENDERER_BACKGROUND_G,
+		RENDERER_BACKGROUND_B);
 
 	// clean previous renderers and then add the current renderer
 	auto window = widget.GetRenderWindow();
@@ -213,6 +217,7 @@ void MainWindow::on_action_Open_triggered()
 	volumeProperty->AddObserver(vtkCommand::AnyEvent, propertycallback);
 
 	volumeProperty->GetRGBTransferFunction()->AddObserver(vtkCommand::AnyEvent, propertycallback);
+        volumeProperty->GetGradientOpacity(0)->AddObserver(vtkCommand::AnyEvent, propertycallback);
 	//volumeProperty->GetGrayTransferFunction()->AddObserver(vtkCommand::AnyEvent, propertycallback);
 
 
@@ -226,19 +231,25 @@ void MainWindow::on_action_Open_triggered()
 
 void MainWindow::on_action_vtkSlicerGPURayCastVolumeMapper_triggered()
 {
-	//if(this->currentVolume != NULL)
-	//{
-	//	//Change VolumeMapper
-	//	vtkSmartPointer<vtkAbstractVolumeMapper> targetVolumeMapper;
-	//	targetVolumeMapper = vtkSmartPointer<vtkSlicerGPURayCastVolumeMapper>::New();
-	//	vtkSmartPointer<vtkAbstractVolumeMapper> oldVolumeMapper = this->currentVolume->GetMapper();
-	//	targetVolumeMapper->SetInputConnection(oldVolumeMapper->GetInputConnection(0,0)); //why 0,0????????
-	//	this->currentVolume->SetMapper(targetVolumeMapper);
-	//	widget.GetRenderWindow()->Render();//refresh the window
-	//}
-	//ui->action_vtkGPUVolumeRayCastMapper->setChecked(false);
-	//ui->action_vtkSmartVolumeMapper->setChecked(false);
-	//ui->action_vtkSlicerGPURayCastVolumeMapper->setChecked(true);
+    //if(this->currentVolume != NULL)
+    //{
+	   // //Change VolumeMapper
+    //        std::cout << "***************4" << std::endl;
+	   // vtkSmartPointer<vtkAbstractVolumeMapper> targetVolumeMapper;
+	   // targetVolumeMapper = vtkSmartPointer<vtkSlicerGPURayCastVolumeMapper>::New();
+    //        std::cout << "***************3" << std::endl;
+	   // vtkSmartPointer<vtkAbstractVolumeMapper> oldVolumeMapper = this->currentVolume->GetMapper();
+    //        std::cout << "***************2" << std::endl;
+	   // targetVolumeMapper->SetInputConnection(oldVolumeMapper->GetInputConnection(0,0));
+    //        std::cout << "***************1" << std::endl;
+	   // this->currentVolume->SetMapper(targetVolumeMapper);
+    //        std::cout << "***************0" << std::endl;
+	   // widget.GetRenderWindow()->Render();//refresh the window
+    //        std::cout << "***************01" << std::endl;
+    //}
+    //ui->action_vtkGPUVolumeRayCastMapper->setChecked(false);
+    //ui->action_vtkSmartVolumeMapper->setChecked(false);
+    //ui->action_vtkSlicerGPURayCastVolumeMapper->setChecked(true);
 }
 
 void MainWindow::on_action_vtkGPUVolumeRayCastMapper_triggered()
@@ -246,11 +257,12 @@ void MainWindow::on_action_vtkGPUVolumeRayCastMapper_triggered()
 	if (this->currentVolume != NULL)
 	{
 		//Change VolumeMapper
-		vtkSmartPointer<vtkAbstractVolumeMapper> targetVolumeMapper;
-		targetVolumeMapper = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
+            vtkSmartPointer<vtkVolumeMapper> volumeMapper;
+                volumeMapper = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
 		vtkSmartPointer<vtkAbstractVolumeMapper> oldVolumeMapper = this->currentVolume->GetMapper();
-		targetVolumeMapper->SetInputConnection(oldVolumeMapper->GetInputConnection(0, 0));//why 0,0????????
-		this->currentVolume->SetMapper(targetVolumeMapper);
+                volumeMapper->SetInputConnection(oldVolumeMapper->GetInputConnection(0, 0));  // why 0,0????????
+                this->currentVolume->SetMapper(volumeMapper);
+                volumeMapper->SetBlendModeToComposite();
 		widget.GetRenderWindow()->Render();//refresh the window
 		
 	}
