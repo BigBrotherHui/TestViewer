@@ -27,6 +27,7 @@
 #include <vtkFeatureEdges.h>
 #include "ImplicitPolyDataDistance.h"
 #include "vtkAlgorithm.h"
+#include <vtkBox.h>
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
 VTK_MODULE_INIT(vtkInteractionStyle);
 VTK_MODULE_INIT(vtkRenderingFreeType);//Failed getting the TextRenderer instance!
@@ -60,7 +61,7 @@ public:
         sprintf(this->TextBuff, "No Contacts");
         }
       this->TextActor->SetInput(this->TextBuff);
-        if (collide->GetContactsOutput()->GetNumberOfPoints() > 0) {
+        if (collide->GetContactsOutput()->GetNumberOfPoints() > 2) {
           // this->RenWin->Render();
             sortVtkPoints(collide->GetContactsOutput()->GetPoints());
           vtkSmartPointer<vtkPoints> polyline_pts = vtkSmartPointer<vtkPoints>::New();
@@ -78,8 +79,9 @@ public:
           vtkSmartPointer<vtkPolyData> polylineData = vtkSmartPointer<vtkPolyData>::New();
           polylineData->SetPoints(polyline_pts);
           polylineData->SetLines(cells);
-          //mapper->SetInputData(polylineData);
-        loop->SetLoop(collide->GetContactsOutput()->GetPoints());
+          
+            loop->SetLoop(collide->GetContactsOutput()->GetPoints());
+           //mapper->SetInputData(polylineData);
         }
         
     }
@@ -99,8 +101,8 @@ int main()
    //  fout->SetInstance(fout);
   
     vtkSmartPointer<vtkSTLReader> reader = vtkSmartPointer<vtkSTLReader>::New();
-    reader->SetFileName("D:\\kasystem\\build\\bin\\x64\\Release\\prosthesisdata\\MeshSTL\\Femur_left.stl");
-    //reader->Update();
+    reader->SetFileName("D:\\kasystem\\build\\bin\\x64\\Release\\prosthesisdata\\MeshSTL\\THA_Pelvis.stl");
+    reader->Update();
 
     /*vtkNew<vtkPlaneSource> sp;
     Eigen::Vector3d tcutpoint{ reader->GetOutput()->GetCenter() };
@@ -108,14 +110,29 @@ int main()
     sp->SetPoint1(Eigen::Vector3d(tcutpoint - 100 * Eigen::Vector3d::UnitX()).data());
     sp->SetPoint2(Eigen::Vector3d(tcutpoint + 100 * Eigen::Vector3d::UnitY()).data());
     sp->Update();*/
-    /*vtkNew<vtkSphereSource> sp;
+
+    vtkNew<vtkSphereSource> sp;
     sp->SetRadius(10);
     sp->SetThetaResolution(50);
     sp->SetPhiResolution(50);
-    sp->SetCenter(reader->GetOutput()->GetCenter());*/
-    vtkSmartPointer<vtkSTLReader> reader2 = vtkSmartPointer<vtkSTLReader>::New();
-    reader2->SetFileName("D:\\kasystem\\build\\bin\\x64\\Release\\prosthesisdata\\MeshSTL\\THA_Pelvis.stl");
-    //reader2->Update();
+    sp->SetCenter(reader->GetOutput()->GetCenter());
+
+    /*vtkSmartPointer<vtkSTLReader> reader2 = vtkSmartPointer<vtkSTLReader>::New();
+    reader2->SetFileName("D:\\kasystem\\build\\bin\\x64\\Release\\prosthesisdata\\MeshSTL\\Femur_left.stl");
+    reader2->Update();
+    vtkNew<vtkBox> box;
+    double *b=reader2->GetOutput()->GetBounds();
+    double bounds[6];
+    memcpy(bounds,b,sizeof(double)*6);
+    bounds[4] = bounds[5] - 100;
+    std::cout << bounds[0] << " " << bounds[1] << " " << bounds[2] << " " << bounds[3] << " " << bounds[4] << " "
+              << bounds[5] << std::endl;
+    box->SetBounds(bounds);
+    vtkNew<vtkClipPolyData> cl;
+    cl->SetClipFunction(box);
+    cl->SetInputData(reader2->GetOutput());
+    cl->GenerateClippedOutputOn();*/
+
     //vtkSmartPointer<vtkLinearExtrusionFilter> ll = vtkSmartPointer<vtkLinearExtrusionFilter>::New();
     //ll->SetInputConnection(sp->GetOutputPort());
     //ll->SetExtrusionTypeToNormalExtrusion();
@@ -126,7 +143,7 @@ int main()
    vtkMatrix4x4 *matrix1 = vtkMatrix4x4::New();
 
    CollisionDetectionFilter *collide = CollisionDetectionFilter::New();
-   collide->SetInputConnection(0, reader2->GetOutputPort());
+   collide->SetInputConnection(0, sp->GetOutputPort());
    collide->SetMatrix(0, matrix0);
    collide->SetInputConnection(1, reader->GetOutputPort());
    collide->SetMatrix(1, matrix1);

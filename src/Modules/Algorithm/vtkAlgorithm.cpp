@@ -89,7 +89,7 @@ void ProjectToPlane(const double x[3], const double origin[3], const double norm
 Eigen::MatrixX3d svdTransform(const Eigen::MatrixX3d& points)
 {
     Eigen::JacobiSVD<Eigen::MatrixX3d> svd(points, Eigen::ComputeThinU | Eigen::ComputeThinV);
-    Eigen::MatrixX3d transformedPoints = svd.matrixU() * points;//.transpose()
+    Eigen::MatrixX3d transformedPoints = svd.matrixU().transpose() * points; 
     return transformedPoints;
 }
 
@@ -132,17 +132,21 @@ void sortVtkPoints(vtkPoints* vtkpoints)
         points.row(i) << vtkpoints->GetPoint(i)[0], vtkpoints->GetPoint(i)[1], vtkpoints->GetPoint(i)[2];
     }
 
-    // Step 1: Fit points to a plane
+    // Step 1: Perform SVD transformation
+    /*Eigen::MatrixX3d transformedPoints = svdTransform(points);
+
+    for (int i = 0; i < transformedPoints.rows(); ++i)
+    {
+        transformedPoints.row(i)[2] = 0;
+    }*/
+    // Step 2: Fit points to a plane
     Eigen::Vector4d planeParameters = fitPlane(points);
 
-    // Step 2: Project points onto the fitted plane
+    // Step 3: Project points onto the fitted plane
     Eigen::MatrixX3d projectedPoints = projectPoints(points, planeParameters);
 
-    // Step 3: Perform SVD transformation
-    Eigen::MatrixX3d transformedPoints = svdTransform(projectedPoints);
-
     // Step 4: Center the points
-    Eigen::MatrixX3d centeredPoints = centerPoints(transformedPoints);
+    Eigen::MatrixX3d centeredPoints = centerPoints(projectedPoints);
 
     // Step 5: Calculate angle of each point with respect to origin
     Eigen::VectorXf angles = calculateAngles(centeredPoints);
