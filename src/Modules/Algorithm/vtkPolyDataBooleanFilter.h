@@ -30,7 +30,7 @@ limitations under the License.
 #include <vtkModifiedBSPTree.h>
 
 #include "Utilities.h"
-
+#include "AlgorithmExports.h"
 #define OPER_NONE 0
 #define OPER_UNION 1
 #define OPER_INTERSECTION 2
@@ -259,7 +259,7 @@ private:
     void MergeStage2 (const ConnsType2 &conns, const ReferencedPointsType &refPts, const ConnsType2 &usedConns, IndexedPolysType &splitted);
 };
 
-class VTK_EXPORT vtkPolyDataBooleanFilter : public vtkPolyDataAlgorithm {
+class Algorithm_EXPORT vtkPolyDataBooleanFilter : public vtkPolyDataAlgorithm {
     vtkPolyData *resultA, *resultB, *resultC;
 
     vtkSmartPointer<vtkPolyData> modPdA, modPdB, contLines;

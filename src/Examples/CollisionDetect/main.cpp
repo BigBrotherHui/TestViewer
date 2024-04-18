@@ -21,7 +21,12 @@
 #include <vtkPolyLine.h>
 #include <vtkCellData.h>
 #include <vtkInteractorStyleTrackballActor.h>
-
+#include <vtkImplicitSelectionLoop.h>
+#include <vtkClipPolyData.h>
+#include <vtkSelectPolyData.h>
+#include <vtkFeatureEdges.h>
+#include "ImplicitPolyDataDistance.h"
+#include "vtkAlgorithm.h"
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
 VTK_MODULE_INIT(vtkInteractionStyle);
 VTK_MODULE_INIT(vtkRenderingFreeType);//Failed getting the TextRenderer instance!
@@ -55,8 +60,31 @@ public:
         sprintf(this->TextBuff, "No Contacts");
         }
       this->TextActor->SetInput(this->TextBuff);
-      //this->RenWin->Render();
+        if (collide->GetContactsOutput()->GetNumberOfPoints() > 0) {
+          // this->RenWin->Render();
+            sortVtkPoints(collide->GetContactsOutput()->GetPoints());
+          vtkSmartPointer<vtkPoints> polyline_pts = vtkSmartPointer<vtkPoints>::New();
+          polyline_pts->DeepCopy(collide->GetContactsOutput()->GetPoints());
+
+          vtkSmartPointer<vtkPolyLine> polyline = vtkSmartPointer<vtkPolyLine>::New();
+          polyline->GetPointIds()->SetNumberOfIds(polyline_pts->GetNumberOfPoints());
+          for (unsigned int i = 0; i < polyline_pts->GetNumberOfPoints(); i++) {
+              polyline->GetPointIds()->SetId(i, i);
+          }
+
+          vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New();
+          cells->InsertNextCell(polyline);
+
+          vtkSmartPointer<vtkPolyData> polylineData = vtkSmartPointer<vtkPolyData>::New();
+          polylineData->SetPoints(polyline_pts);
+          polylineData->SetLines(cells);
+          //mapper->SetInputData(polylineData);
+        loop->SetLoop(collide->GetContactsOutput()->GetPoints());
+        }
+        
     }
+    vtkSelectPolyData *loop;
+    vtkPolyDataMapper *mapper;
 
 protected:
   vtkTextActor *TextActor;
@@ -72,7 +100,7 @@ int main()
   
     vtkSmartPointer<vtkSTLReader> reader = vtkSmartPointer<vtkSTLReader>::New();
     reader->SetFileName("D:\\kasystem\\build\\bin\\x64\\Release\\prosthesisdata\\MeshSTL\\Femur_left.stl");
-    reader->Update();
+    //reader->Update();
 
     /*vtkNew<vtkPlaneSource> sp;
     Eigen::Vector3d tcutpoint{ reader->GetOutput()->GetCenter() };
@@ -80,9 +108,14 @@ int main()
     sp->SetPoint1(Eigen::Vector3d(tcutpoint - 100 * Eigen::Vector3d::UnitX()).data());
     sp->SetPoint2(Eigen::Vector3d(tcutpoint + 100 * Eigen::Vector3d::UnitY()).data());
     sp->Update();*/
-    vtkNew<vtkSphereSource> sp;
+    /*vtkNew<vtkSphereSource> sp;
     sp->SetRadius(10);
-    sp->SetCenter(reader->GetOutput()->GetCenter());
+    sp->SetThetaResolution(50);
+    sp->SetPhiResolution(50);
+    sp->SetCenter(reader->GetOutput()->GetCenter());*/
+    vtkSmartPointer<vtkSTLReader> reader2 = vtkSmartPointer<vtkSTLReader>::New();
+    reader2->SetFileName("D:\\kasystem\\build\\bin\\x64\\Release\\prosthesisdata\\MeshSTL\\THA_Pelvis.stl");
+    //reader2->Update();
     //vtkSmartPointer<vtkLinearExtrusionFilter> ll = vtkSmartPointer<vtkLinearExtrusionFilter>::New();
     //ll->SetInputConnection(sp->GetOutputPort());
     //ll->SetExtrusionTypeToNormalExtrusion();
@@ -93,7 +126,7 @@ int main()
    vtkMatrix4x4 *matrix1 = vtkMatrix4x4::New();
 
    CollisionDetectionFilter *collide = CollisionDetectionFilter::New();
-   collide->SetInputConnection(0, sp->GetOutputPort());
+   collide->SetInputConnection(0, reader2->GetOutputPort());
    collide->SetMatrix(0, matrix0);
    collide->SetInputConnection(1, reader->GetOutputPort());
    collide->SetMatrix(1, matrix1);
@@ -103,17 +136,19 @@ int main()
    collide->SetCollisionModeToAllContacts();
    float red[3]{255, 0, 0};
    collide->SetCollideCellsColor(red);
-   collide->GenerateScalarsOn();
-
+   //collide->GenerateScalarsOn();
+   //collide->Update();
    vtkPolyDataMapper *mapper1 = vtkPolyDataMapper::New();
+   //mapper1->SetInputConnection(collide->GetOutputPort(0));
    mapper1->SetInputConnection(collide->GetOutputPort(0));
    vtkActor *actor1 = vtkActor::New();
    actor1->SetMapper(mapper1);
    //actor1->GetProperty()->BackfaceCullingOn();
    actor1->SetUserMatrix(matrix0);
-   actor1->GetProperty()->SetOpacity(.2);
+   //actor1->GetProperty()->SetOpacity(.1);
    vtkPolyDataMapper *mapper2 = vtkPolyDataMapper::New();
 
+   //mapper2->SetInputConnection(collide->GetOutputPort(1));
    mapper2->SetInputConnection(collide->GetOutputPort(1));
 
    vtkActor *actor2 = vtkActor::New();
@@ -121,6 +156,9 @@ int main()
    actor2->SetMapper(mapper2);
    //actor2->GetProperty()->BackfaceCullingOn();
    actor2->SetUserMatrix(matrix1);
+   //actor2->GetProperty()->SetOpacity(.1);
+
+   //sortVtkPoints(collide->GetContactsOutput()->GetPoints());
 
    /*vtkSmartPointer<vtkPoints>polyline_pts = vtkSmartPointer<vtkPoints>::New();
    polyline_pts->DeepCopy(collide->GetContactsOutput()->GetPoints());
@@ -139,20 +177,35 @@ int main()
    polylineData->SetPoints(polyline_pts);
    polylineData->SetLines(cells);*/
 
-   //vtkPolyDataMapper *mapper3 = vtkPolyDataMapper::New();
-   //mapper3->SetInputConnection(collide->GetContactsOutputPort());//polylineData
+   //vtkNew<vtkImplicitSelectionLoop> loop;
+   vtkNew<vtkSelectPolyData> loop;
+   loop->SetInputConnection(reader->GetOutputPort());
+   loop->GenerateSelectionScalarsOn();
+   loop->SetSelectionModeToSmallestRegion();  // negative scalars inside
+   //loop->SetLoop(collide->GetContactsOutput()->GetPoints());
+   //vtkNew<vtkImplicitPolyDataDistance> distance;
+   //distance->SetInput(reader->GetOutput());
+   vtkNew<vtkClipPolyData> clip;
+   clip->SetInputConnection(loop->GetOutputPort());
+   clip->GenerateClippedOutputOn();
+   /*clip->SetClipFunction(loop);
+   clip->SetValue(0.0);*/
+   vtkPolyDataMapper *mapper3 = vtkPolyDataMapper::New();
+   //mapper3->SetInputConnection(clip->GetClippedOutputPort());
+   mapper3->SetInputConnection(clip->GetOutputPort()); 
+    //mapper3->SetInputData(polylineData);
    //mapper3->SetResolveCoincidentTopologyToPolygonOffset();
-   //vtkActor *actor3 = vtkActor::New();
-   //actor3->SetMapper(mapper3);
-   //actor3->GetProperty()->SetColor(1,0,0);
-   //actor3->GetProperty()->SetLineWidth(3.0);
+   vtkActor *actor3 = vtkActor::New();
+   actor3->SetMapper(mapper3);
+   actor3->GetProperty()->SetColor(1,0,0);
+   actor3->GetProperty()->SetLineWidth(3.0);
 
    vtkTextActor *txt = vtkTextActor::New();
 
    vtkRenderer *ren = vtkRenderer::New();
    ren->AddActor(actor1);
    ren->AddActor(actor2);
-   //ren->AddActor(actor3);
+   ren->AddActor(actor3);
    ren->AddActor(txt);
    ren->SetBackground(0.5,0.5,0.5);
 
@@ -167,6 +220,8 @@ int main()
    vtkCollisionCallback *cbCollide = vtkCollisionCallback::New();
    cbCollide->SetTextActor(txt);
    cbCollide->SetRenderWindow(renWin);
+   cbCollide->loop = loop;
+   cbCollide->mapper = mapper3;
    collide->AddObserver(vtkCommand::EndEvent, cbCollide);
    renWin->Render();
    iren->Start(); 

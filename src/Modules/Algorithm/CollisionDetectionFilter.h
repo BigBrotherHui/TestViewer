@@ -94,6 +94,7 @@
 #include "vtkFieldData.h"             // For GetContactCells
 #include "vtkFiltersModelingModule.h" // For export macro
 #include "vtkPolyDataAlgorithm.h"
+#include "AlgorithmExports.h"
 
 class vtkOBBTree;
 class vtkPolyData;
@@ -102,8 +103,7 @@ class vtkMatrix4x4;
 class vtkLinearTransform;
 class vtkIdTypeArray;
 
-class CollisionDetectionFilter : public vtkPolyDataAlgorithm
-{
+class Algorithm_EXPORT CollisionDetectionFilter : public vtkPolyDataAlgorithm {
 public:
   ///@{
   /**
