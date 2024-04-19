@@ -94,7 +94,7 @@ void asclepios::gui::vtkWidget3D::setFilter(const QString& t_filePath)
 	}
 }
 
-//-----------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------
 void asclepios::gui::vtkWidget3D::render()
 {
 	m_renderWindows[0]->OffScreenRenderingOn();

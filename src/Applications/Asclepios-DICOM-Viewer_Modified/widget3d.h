@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <qfuture.h>
 #include <QVTKOpenGLNativeWidget.h>
@@ -6,7 +6,8 @@
 #include "widgetbase.h"
 #include "toolbarwidget3d.h"
 #include "ui_widget3d.h"
-
+#include <vtkAnnotatedCubeActor.h>
+#include <vtkOrientationMarkerWidget.h>
 namespace asclepios::gui
 {
 	class Widget3D final : public WidgetBase
@@ -46,5 +47,7 @@ namespace asclepios::gui
 		void createConnections() override;
 		void startLoadingAnimation() override;
 		void static onRenderAsync(Widget3D* t_self);
+        vtkNew<vtkAnnotatedCubeActor> m_axes;
+        vtkNew<vtkOrientationMarkerWidget> m_markwidget; 
 	};
 }

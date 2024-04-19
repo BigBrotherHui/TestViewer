@@ -117,9 +117,24 @@ void asclepios::gui::Widget3D::onFinishedRenderAsync()
 	auto* const renderWindow =
 		m_qtvtkWidget->GetRenderWindow();
 	renderWindow->AddRenderer(m_vtkWidget->
-		getRenderWindows()[0]->GetRenderers()->
-		GetFirstRenderer());
+	getRenderWindows()[0]->GetRenderers()->
+	GetFirstRenderer());
+
+    m_axes->SetXPlusFaceText("L");
+    m_axes->SetXMinusFaceText("R");
+    m_axes->SetYMinusFaceText("A");
+    m_axes->SetYPlusFaceText("P");
+    m_axes->SetZMinusFaceText("I");
+    m_axes->SetZPlusFaceText("S");
+    m_markwidget->SetOutlineColor(1, 1, 1);
+    m_markwidget->SetOrientationMarker(m_axes);
+    m_markwidget->SetInteractor(m_qtvtkWidget->interactor());
+    m_markwidget->SetViewport(0.9, 0.05, 1.0, 0.15);
+    m_markwidget->SetEnabled(1);
+    m_markwidget->InteractiveOff();
+
 	renderWindow->Render();
+      
 	onfilterChanged(m_toolbar->getUI()
 		.comboBoxFilters->itemData(0).toString());
 	stopLoadingAnimation();
