@@ -10,6 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt5Core REQUIRED)
 find_package(VTK REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(OpenMP REQUIRED)
+
 tidyFolder()
 
 
@@ -58,4 +60,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${EIGEN3_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core ${VTK_LIBRARIES} Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core ${VTK_LIBRARIES} Eigen3::Eigen OpenMP::OpenMP_CXX)

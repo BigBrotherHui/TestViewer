@@ -2,6 +2,12 @@
 #include <math.h>
 #include <Eigen/Eigen>
 #include <vtkRenderWindow.h>
+#include <vtkCellData.h>
+#include <vtkMath.h>
+#include <vtkImplicitPolyDataDistance.h>
+#include <vtkSMPTools.h>
+#include "ClipPolyData.h"
+#include <vtkBox.h>
 #define M_PI 3.1415926
 void calculateTranslateX(double &x, double &y, double angle)
 {
@@ -165,3 +171,58 @@ void sortVtkPoints(vtkPoints* vtkpoints)
     sortedPoints->Delete();
 }
 
+//input1为碰撞者 input2为被碰撞者
+vtkSmartPointer<vtkPolyData> extractCollideCellids(vtkPolyData* input1, vtkPolyData* input2)
+{
+    vtkSmartPointer<vtkPolyData> copy = vtkSmartPointer<vtkPolyData>::New();
+    vtkNew<vtkBox> box;
+    double* bounds = input1->GetBounds();
+    box->SetBounds(bounds);
+    vtkNew<ClipPolyData> cl;
+    cl->SetClipFunction(box);
+    cl->SetInputData(input2);
+    cl->GenerateClippedOutputOn();
+    cl->Update();
+    vtkPolyData* clPolyData = cl->GetClippedOutput();
+    copy->DeepCopy(clPolyData);
+    input2->DeepCopy(cl->GetOutput());
+    vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+    colors->SetNumberOfComponents(4);
+    colors->SetNumberOfTuples(copy->GetNumberOfCells());
+    double markColor[4]{255, 0, 0,255};
+    double normalColor[4]{255, 255, 255, 255};
+    std::unordered_map<int, double> distanceCache;
+    vtkSmartPointer<vtkImplicitPolyDataDistance> distanceFilter = vtkSmartPointer<vtkImplicitPolyDataDistance>::New();
+    distanceFilter->SetInput(input1);
+    for (int i = 0; i < copy->GetNumberOfCells(); ++i)
+    {
+        vtkCell* cell = copy->GetCell(i);
+        int numPts = cell->GetNumberOfPoints();
+        vtkPoints* cellPts = cell->GetPoints();
+        bool isMark{false};
+        double* color = normalColor;
+        for (int j = 0; j < numPts; ++j) {
+            int ptid = cell->GetPointId(j);
+            double* pt = cellPts->GetPoint(j);
+            double distance{0.0};
+            if (distanceCache.find(ptid) != distanceCache.end()) {
+                distance = distanceCache[ptid];
+            }
+            else {
+                distance = distanceFilter->EvaluateFunction(pt);
+                distanceCache[ptid] = distance;
+            }
+            if (distance < 0) {
+                isMark = true;
+                break;
+            }
+        }
+        if (isMark) {
+            color = markColor;
+        }
+        colors->SetTuple4(i, color[0], color[1], color[2], color[3]);
+    }
+
+    copy->GetCellData()->SetScalars(colors);
+    return copy;
+}
