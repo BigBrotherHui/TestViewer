@@ -36,4 +36,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Applications")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Widgets Qt5::Core Qt5::Concurrent ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${DCMTK_LIBRARIES} Core
-Algorithm ${CMAKE_SOURCE_DIR}/lib/vtkDICOM-9.1.lib)
+Algorithm)#${CMAKE_SOURCE_DIR}/lib/vtkDICOM-9.1.lib

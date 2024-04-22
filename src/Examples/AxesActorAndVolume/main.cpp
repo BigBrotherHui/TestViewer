@@ -18,6 +18,7 @@
 #include <vtkAutoInit.h>
 #include <vtkAnnotatedCubeActor.h>
 #include <vtkImageFlip.h>
+#include <vtkDICOMReader.h>
 #include <iostream>
 
 
@@ -26,34 +27,68 @@
 #include <itkGDCMImageIO.h>
 #include <itkGDCMSeriesFileNames.h>
 #include <itkImageToVTKImageFilter.h>
+
+#include <QDebug>
+#include <vtkDICOMSorter.h>
+#include <vtkStringArray.h>
+#include <QDir>
+
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
 VTK_MODULE_INIT(vtkRenderingVolumeOpenGL2);
 VTK_MODULE_INIT(vtkInteractionStyle);
 VTK_MODULE_INIT(vtkRenderingFreeType);
 int main(int argc, char* argv[])
 {
-    std::string path = "D:\\image\\CTJ212303";
-	
-	//开始读取DICOM数据序列
+    /* vtkNew<vtkDICOMImageReader> vtkreader;
+     vtkreader->SetFileName(path.c_str());
+     vtkreader->Update();*/
+    std::string path = "D:\\Images\\THAIMAGE";
+    vtkNew<vtkDICOMReader> newReader;
+    vtkNew<vtkStringArray> sinleFramesImages;
+    vtkNew<vtkDICOMSorter> sorter;
+    int count = 0;
+    QDir dir(QString::fromStdString(path));
+    auto list = dir.entryInfoList(QStringList() << "*.dcm", QDir::Files);
+    for (const auto& image : list) {
+        const auto path = image.absoluteFilePath();
+        if (!path.isEmpty()) {
+            sinleFramesImages->InsertValue(count++, path.toStdString());
+        }
+    }   
+    sorter->SetInputFileNames(sinleFramesImages);
+    sorter->Update();
+    qDebug() << "number of series:"<< sorter->GetNumberOfSeries();
+    newReader->SetFileNames(sorter->GetFileNamesForSeries(0));
+    newReader->SetDataByteOrderToLittleEndian();
+    newReader->Update();
+    vtkNew<vtkImageFlip> flipy;
+    flipy->SetInputData(newReader->GetOutput());
+    flipy->SetFilteredAxis(1);
+    flipy->Update();
+    vtkNew<vtkImageFlip> flipz;
+    flipz->SetInputData(flipy->GetOutput());
+    flipz->SetFilteredAxis(2);
+    flipz->Update();
+    //开始读取DICOM数据序列
     typedef signed short shortPixelType;   
-	const unsigned int  Dim = 3;       //数据的Dimension
+    const unsigned int  Dim = 3;       //数据的Dimension
   
-	typedef itk::Image<shortPixelType, Dim> ShortImageType;
-	typedef itk::ImageSeriesReader<ShortImageType> ReaderType;
-    
-	itk::GDCMImageIO::Pointer gdcmIO = itk::GDCMImageIO::New();
-	itk::GDCMSeriesFileNames::Pointer seriesFileNames= itk::GDCMSeriesFileNames::New();
+    typedef itk::Image<shortPixelType, Dim> ShortImageType;
+    typedef itk::ImageSeriesReader<ShortImageType> ReaderType;
+
+    itk::GDCMImageIO::Pointer gdcmIO = itk::GDCMImageIO::New();
+    itk::GDCMSeriesFileNames::Pointer seriesFileNames= itk::GDCMSeriesFileNames::New();
 
     seriesFileNames->SetDirectory(path);
     const itk::GDCMSeriesFileNames::SeriesUIDContainerType& seriesUIDs = seriesFileNames->GetSeriesUIDs();
 	const ReaderType::FileNamesContainer& filenames = seriesFileNames->GetFileNames(seriesUIDs[0]);
 
     typename ReaderType::Pointer reader = ReaderType::New();
-	try
-	{
-		reader->SetImageIO(gdcmIO);
-		reader->SetFileNames(filenames);
-		reader->Update();
+    try
+    {
+	reader->SetImageIO(gdcmIO);
+	reader->SetFileNames(filenames);
+	reader->Update();
     }
     catch (itk::ExceptionObject& ex)
     {
@@ -65,7 +100,10 @@ int main(int argc, char* argv[])
     cast->SetInput(reader->GetOutput());
     cast->Update();
     vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
-    volumeMapper->SetInputData(cast->GetOutput());
+    flipz->GetOutput()->Print(std::cout);
+    qDebug() << "==========================";
+    cast->GetOutput()->Print(std::cout);
+    volumeMapper->SetInputData(flipz->GetOutput());
 
     //设置光线采样距离
     // volumeMapper->SetSampleDistance(volumeMapper->GetSampleDistance()*4);
