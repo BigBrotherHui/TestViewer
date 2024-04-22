@@ -104,13 +104,14 @@ void asclepios::gui::vtkWidget3D::render()
 	const auto reader = m_image && m_image->getIsMultiFrame()
 		                    ? m_image->getImageReader()
 		                    : m_series->getReaderForAllSingleFrameImages();
-        vtkNew<vtkImageFlip> flipy;
+        reader->SetMemoryRowOrderToFileNative();
+        /*vtkNew<vtkImageFlip> flipy;
         flipy->SetInputConnection(reader->GetOutputPort());
         flipy->SetFilteredAxis(1);
         vtkNew<vtkImageFlip> flipz;
         flipz->SetInputConnection(flipy->GetOutputPort());
-        flipz->SetFilteredAxis(2);
-        m_mapper->SetInputConnection(flipz->GetOutputPort());
+        flipz->SetFilteredAxis(2);*/
+        m_mapper->SetInputConnection(reader->GetOutputPort());
 	m_transferFunction->updateWindowLevel(window, level);
 	m_volume->SetMapper(m_mapper);
 	m_renderer->AddActor(m_volume);

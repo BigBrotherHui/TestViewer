@@ -31,6 +31,8 @@
 #include <QDebug>
 #include <vtkDICOMSorter.h>
 #include <vtkStringArray.h>
+#include <vtkMatrix3x3.h>
+#include <vtkMatrix4x4.h>
 #include <QDir>
 
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
@@ -60,15 +62,31 @@ int main(int argc, char* argv[])
     qDebug() << "number of series:"<< sorter->GetNumberOfSeries();
     newReader->SetFileNames(sorter->GetFileNamesForSeries(0));
     newReader->SetDataByteOrderToLittleEndian();
+    newReader->SetMemoryRowOrderToFileNative();
+
     newReader->Update();
-    vtkNew<vtkImageFlip> flipy;
+    //vtkSmartPointer<vtkMatrix3x3> vmt = vtkSmartPointer<vtkMatrix3x3>::New();
+    //for (int i=0;i<3;++i)
+    //{
+    //    for (int j=0;j<3;++j)
+    //    {
+    //        vmt->SetElement(i, j, newReader->GetPatientMatrix()->GetElement(i, j));
+    //    }
+    //}
+    //newReader->GetOutput()->SetDirectionMatrix(vmt);
+    //newReader->GetOutput()->SetOrigin(newReader->GetPatientMatrix()->GetElement(0, 3),
+    //                                  newReader->GetPatientMatrix()->GetElement(1, 3),
+    //                                  newReader->GetPatientMatrix()->GetElement(2,3));
+    //newReader->GetPatientMatrix()->Print(std::cout);
+    //newReader->GetOutput()->GetDirectionMatrix()->Print(std::cout);
+    /*vtkNew<vtkImageFlip> flipy;
     flipy->SetInputData(newReader->GetOutput());
     flipy->SetFilteredAxis(1);
     flipy->Update();
     vtkNew<vtkImageFlip> flipz;
     flipz->SetInputData(flipy->GetOutput());
     flipz->SetFilteredAxis(2);
-    flipz->Update();
+    flipz->Update();*/
     //开始读取DICOM数据序列
     typedef signed short shortPixelType;   
     const unsigned int  Dim = 3;       //数据的Dimension
@@ -100,10 +118,10 @@ int main(int argc, char* argv[])
     cast->SetInput(reader->GetOutput());
     cast->Update();
     vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
-    flipz->GetOutput()->Print(std::cout);
+    newReader->GetOutput()->Print(std::cout);
     qDebug() << "==========================";
     cast->GetOutput()->Print(std::cout);
-    volumeMapper->SetInputData(flipz->GetOutput());
+    volumeMapper->SetInputData(newReader->GetOutput());
 
     //设置光线采样距离
     // volumeMapper->SetSampleDistance(volumeMapper->GetSampleDistance()*4);

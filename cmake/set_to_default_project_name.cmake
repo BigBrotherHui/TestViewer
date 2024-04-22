@@ -1,0 +1,7 @@
+function(set_to_default_project_name)
+    if(NOT DEFINED PROJECT_NAME)
+        get_filename_component(DEFAULT_PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+        set(PROJECT_NAME ${DEFAULT_PROJECT_NAME} CACHE STRING "Name of the project" FORCE)
+        message(STATUS "PROJECT_NAME not defined. Using folder name: ${PROJECT_NAME}")
+    endif()
+endfunction()
