@@ -1,23 +1,21 @@
-cmake_minimum_required(VERSION 2.8.11)
-
-project(VolumeRenderer)
-
-find_package(OpenGL REQUIRED)
-find_package(CTK REQUIRED)
-
-# VTK is required
-find_package(VTK REQUIRED)
-
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-find_package(Qt5 REQUIRED Core Widgets OpenGL Xml UiTools XmlPatterns Concurrent Script)
-# Use the compile definitions defined in the Qt 5 Widgets module
-tidyFolder()
-include_directories(${CTK_INCLUDE_DIRS})
-include_directories(${CMAKE_SOURCE_DIR}/include)
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-set(target_directory "Examples")
+project(DRRGenerator)
+cmake_minimum_required(VERSION 2.8)
+ADD_DEFINITIONS(
+    -std=c++11
+    -O3
+)
+message("CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
+find_package(OpenMP)
+find_package(Eigen3 REQUIRED)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+find_package( OpenCV REQUIRED )
+add_executable(${PROJECT_NAME} main.cpp DRRgenerator.cpp )
+target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS} )
+target_include_directories(${PROJECT_NAME} PRIVATE ${EIGEN3_INCLUDE_DIR})
+set(target_directory "Plugins")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -37,6 +35,6 @@ if (CMAKE_GENERATOR MATCHES "Visual Studio")
     set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_GENERATOR_PLATFORM}/$<CONFIGURATION>/${target_directory})
 endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER ${target_directory})
-# Use the Widgets module from Qt 5.
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::OpenGL Qt5::Xml Qt5::UiTools Qt5::XmlPatterns Qt5::Concurrent Qt5::Script
-${VTK_LIBRARIES} ${OPENGL_LIBRARIES} ${CTK_LIBRARIES})
+target_link_libraries( ${PROJECT_NAME}   ${OpenCV_LIBS}  Eigen3::Eigen)
+
+
