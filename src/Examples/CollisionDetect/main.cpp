@@ -242,8 +242,8 @@ int main()
    mapper3->SetRelativeCoincidentTopologyLineOffsetParameters(0, -66000);
    mapper3->SetRelativeCoincidentTopologyPolygonOffsetParameters(0, -66000);
    mapper3->SetRelativeCoincidentTopologyPointOffsetParameter(-66000);*/
-   actor3->GetProperty()->SetColor(1,0,0);
-   actor3->GetProperty()->SetLineWidth(3.0);
+   //actor3->GetProperty()->SetColor(1,0,0);
+   //actor3->GetProperty()->SetLineWidth(3.0);
 
    vtkTextActor *txt = vtkTextActor::New();
 
