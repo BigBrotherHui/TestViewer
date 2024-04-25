@@ -100,12 +100,6 @@ int main(int argc, char* argv[])
     obbTree->SetMaxLevel(maxLevel);
     obbTree->BuildLocator();
 
-    double corner[3] = {0.0, 0.0, 0.0};
-    double max[3] = {0.0, 0.0, 0.0};
-    double mid[3] = {0.0, 0.0, 0.0};
-    double min[3] = {0.0, 0.0, 0.0};
-    double size[3] = {0.0, 0.0, 0.0};
-
     auto polydata = vtkSmartPointer<vtkPolyData>::New();
     obbTree->GenerateRepresentation(0, polydata);
     auto obbtreeMapper = vtkSmartPointer<vtkPolyDataMapper>::New();

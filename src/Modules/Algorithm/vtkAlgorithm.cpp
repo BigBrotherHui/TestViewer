@@ -8,6 +8,11 @@
 #include <vtkSMPTools.h>
 #include "ClipPolyData.h"
 #include <vtkBox.h>
+#include <QDebug>
+#include <vtkClipPolyData.h>
+#include <vtkLoopSubdivisionFilter.h>
+#include <vtkTriangleFilter.h>
+#include <vtkLinearSubdivisionFilter.h>
 #define M_PI 3.1415926
 void calculateTranslateX(double &x, double &y, double angle)
 {
@@ -172,35 +177,42 @@ void sortVtkPoints(vtkPoints* vtkpoints)
 }
 
 //input1为碰撞者 input2为被碰撞者
-vtkSmartPointer<vtkPolyData> extractCollideCellids(vtkPolyData* input1, vtkPolyData* input2)
+vtkSmartPointer<vtkPolyData> extractCollideCellids(vtkPolyData* input1, vtkPolyData* input2,int& totalCollide,
+                                                   bool caculateAll)
 {
     vtkSmartPointer<vtkPolyData> copy = vtkSmartPointer<vtkPolyData>::New();
-    vtkNew<vtkBox> box;
-    double* bounds = input1->GetBounds();
-    box->SetBounds(bounds);
-    vtkNew<ClipPolyData> cl;
-    cl->SetClipFunction(box);
-    cl->SetInputData(input2);
-    cl->GenerateClippedOutputOn();
-    cl->Update();
-    vtkPolyData* clPolyData = cl->GetClippedOutput();
-    copy->DeepCopy(clPolyData);
-    input2->DeepCopy(cl->GetOutput());
-    vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
-    colors->SetNumberOfComponents(4);
-    colors->SetNumberOfTuples(copy->GetNumberOfCells());
-    double markColor[4]{255, 0, 0,255};
-    double normalColor[4]{255, 255, 255, 255};
+    if (!caculateAll) {
+        vtkNew<vtkBox> box;
+        double* bounds = input1->GetBounds();
+        box->SetBounds(bounds);
+        //vtkSmartPointer<vtkLinearSubdivisionFilter> loop = vtkSmartPointer<vtkLinearSubdivisionFilter>::New();
+        //loop->SetInputData(input2);
+        //loop->SetNumberOfSubdivisions(2);
+        //loop->Update();
+        vtkNew<vtkClipPolyData> cl;
+        cl->SetClipFunction(box);
+        cl->SetInputData(input2);
+        cl->GenerateClippedOutputOn();
+        cl->Update();
+        vtkPolyData* clPolyData = cl->GetClippedOutput();
+        copy->DeepCopy(clPolyData);
+    }
+    else {
+        /*vtkSmartPointer<vtkLoopSubdivisionFilter> loop = vtkSmartPointer<vtkLoopSubdivisionFilter>::New();
+        loop->SetInputData(input2);
+        loop->SetNumberOfSubdivisions(4);
+        loop->Update();*/
+        copy->DeepCopy(input2);
+    }
     std::unordered_map<int, double> distanceCache;
     vtkSmartPointer<vtkImplicitPolyDataDistance> distanceFilter = vtkSmartPointer<vtkImplicitPolyDataDistance>::New();
     distanceFilter->SetInput(input1);
-    for (int i = 0; i < copy->GetNumberOfCells(); ++i)
-    {
+    for (int i = 0; i < copy->GetNumberOfCells(); ++i) {
         vtkCell* cell = copy->GetCell(i);
         int numPts = cell->GetNumberOfPoints();
         vtkPoints* cellPts = cell->GetPoints();
         bool isMark{false};
-        double* color = normalColor;
+        int collideNum = 0;
         for (int j = 0; j < numPts; ++j) {
             int ptid = cell->GetPointId(j);
             double* pt = cellPts->GetPoint(j);
@@ -213,16 +225,30 @@ vtkSmartPointer<vtkPolyData> extractCollideCellids(vtkPolyData* input1, vtkPolyD
                 distanceCache[ptid] = distance;
             }
             if (distance < 0) {
+                collideNum++;
+            }
+            if (collideNum > 1) {
                 isMark = true;
                 break;
             }
         }
         if (isMark) {
-            color = markColor;
+            totalCollide++;
         }
-        colors->SetTuple4(i, color[0], color[1], color[2], color[3]);
+        else {
+            copy->DeleteCell(i);
+        }
     }
-
+    copy->RemoveDeletedCells();
+    copy->Modified();
+    vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+    colors->SetNumberOfComponents(4);
+    colors->SetNumberOfTuples(copy->GetNumberOfCells());
+    double markColor[4]{255, 0, 0, 255};
+    for (int k = 0; k < copy->GetNumberOfCells(); ++k) {
+        colors->SetTuple4(k, markColor[0], markColor[1], markColor[2], markColor[3]);
+    }
     copy->GetCellData()->SetScalars(colors);
+    qDebug() << "total collide cell number is:" << totalCollide;
     return copy;
 }

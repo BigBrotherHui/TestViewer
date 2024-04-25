@@ -18,4 +18,5 @@ Algorithm_EXPORT Eigen::MatrixX3d svdTransform(const Eigen::MatrixX3d &points);
 Algorithm_EXPORT Eigen::MatrixX3d centerPoints(const Eigen::MatrixX3d &points);
 Algorithm_EXPORT Eigen::VectorXf calculateAngles(const Eigen::MatrixX3d &points);
 Algorithm_EXPORT Eigen::VectorXi renumberPoints(const Eigen::VectorXf &angles);
-Algorithm_EXPORT vtkSmartPointer<vtkPolyData> extractCollideCellids(vtkPolyData *input1,vtkPolyData *input2);
+Algorithm_EXPORT vtkSmartPointer<vtkPolyData> extractCollideCellids(vtkPolyData *input1, vtkPolyData *input2,
+                                                                    int &totalCollide, bool caculateAll=false);
