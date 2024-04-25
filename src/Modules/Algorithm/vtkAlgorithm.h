@@ -4,6 +4,7 @@
 #include <Eigen/Eigen>
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
+#include <vtkImageData.h>
 //use for mpr
 Algorithm_EXPORT void calculateTranslateX(double &x, double &y, double angle);
 Algorithm_EXPORT void calculateTranslateY(double &x, double &y, double angle);
@@ -20,3 +21,6 @@ Algorithm_EXPORT Eigen::VectorXf calculateAngles(const Eigen::MatrixX3d &points)
 Algorithm_EXPORT Eigen::VectorXi renumberPoints(const Eigen::VectorXf &angles);
 Algorithm_EXPORT vtkSmartPointer<vtkPolyData> extractCollideCellids(vtkPolyData *input1, vtkPolyData *input2,
                                                                     int &totalCollide, bool caculateAll=false);
+Algorithm_EXPORT void cropImageByPolyData(vtkSmartPointer<vtkImageData> sourceImage,
+                                          vtkSmartPointer<vtkImageData> dstImage,
+                                          vtkSmartPointer<vtkPolyData> polydata);

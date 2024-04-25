@@ -60,4 +60,5 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${EIGEN3_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core ${VTK_LIBRARIES} Eigen3::Eigen OpenMP::OpenMP_CXX)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core ${VTK_LIBRARIES} OpenMP::OpenMP_CXX)
+target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)

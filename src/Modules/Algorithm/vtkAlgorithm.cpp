@@ -13,6 +13,9 @@
 #include <vtkLoopSubdivisionFilter.h>
 #include <vtkTriangleFilter.h>
 #include <vtkLinearSubdivisionFilter.h>
+#include <vtkExtractVOI.h>
+#include <vtkPolyDataToImageStencil.h>
+#include <vtkImageStencil.h>
 #define M_PI 3.1415926
 void calculateTranslateX(double &x, double &y, double angle)
 {
@@ -251,4 +254,63 @@ vtkSmartPointer<vtkPolyData> extractCollideCellids(vtkPolyData* input1, vtkPolyD
     copy->GetCellData()->SetScalars(colors);
     qDebug() << "total collide cell number is:" << totalCollide;
     return copy;
+}
+void cropImageByPolyData(vtkSmartPointer<vtkImageData> sourceImage, vtkSmartPointer<vtkImageData> dstImage,
+                    vtkSmartPointer<vtkPolyData> polydata)
+{
+    if (!sourceImage || !dstImage || !polydata) {
+        return;
+    }
+
+    double bounds[6];
+    polydata->GetBounds(bounds);
+
+    // 获取 imageData 的原点、间距和范围
+    double origin[3];
+    double spacing[3];
+    int extent[6];
+    sourceImage->GetOrigin(origin);
+    sourceImage->GetSpacing(spacing);
+    sourceImage->GetExtent(extent);
+
+    // 计算索引坐标
+    int indexBounds[6];
+    for (int i = 0; i < 3; ++i) {
+        indexBounds[2 * i] = std::ceil((bounds[2 * i] - origin[i]) / spacing[i]);
+        indexBounds[2 * i + 1] = std::ceil((bounds[2 * i + 1] - origin[i]) / spacing[i]);
+
+        // 确保索引坐标在有效范围内
+        indexBounds[2 * i] = std::max(indexBounds[2 * i], extent[2 * i]);
+        indexBounds[2 * i + 1] = std::min(indexBounds[2 * i + 1], extent[2 * i + 1]);
+    }
+
+    // 打印结果
+    /*std::cout << "Index Bounds: [" << indexBounds[0] << ", " << indexBounds[1] << ", " << indexBounds[2] << ", "
+              << indexBounds[3] << ", " << indexBounds[4] << ", " << indexBounds[5] << "]" << std::endl;*/
+
+    // 首先需要将vtkPolyData转换为vtkImageStencilData
+    vtkSmartPointer<vtkPolyDataToImageStencil> polyDataToStencil = vtkSmartPointer<vtkPolyDataToImageStencil>::New();
+    polyDataToStencil->SetInputData(polydata);
+    polyDataToStencil->SetOutputSpacing(sourceImage->GetSpacing());
+    polyDataToStencil->SetOutputOrigin(sourceImage->GetOrigin());
+    polyDataToStencil->SetOutputWholeExtent(sourceImage->GetExtent());
+    polyDataToStencil->Update();
+
+    // 将原始图像中的蒙板区域外部的像素设置为0
+    vtkSmartPointer<vtkImageStencil> imageStencil = vtkSmartPointer<vtkImageStencil>::New();
+    imageStencil->SetInputData(sourceImage);
+    imageStencil->SetStencilData(polyDataToStencil->GetOutput());
+    imageStencil->ReverseStencilOff();
+    imageStencil->SetBackgroundValue(0);
+    imageStencil->Update();
+
+    vtkSmartPointer<vtkExtractVOI> extractVOI = vtkSmartPointer<vtkExtractVOI>::New();
+    extractVOI->SetInputData(imageStencil->GetOutput());
+    extractVOI->SetVOI(indexBounds[0], indexBounds[1], indexBounds[2], indexBounds[3], indexBounds[4],
+                       indexBounds[5]);  // 指定感兴趣区域
+    extractVOI->Update();
+
+    dstImage->DeepCopy(extractVOI->GetOutput());
+
+    return;
 }

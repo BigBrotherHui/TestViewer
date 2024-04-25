@@ -39,6 +39,7 @@ VTK_MODULE_INIT(vtkRenderingOpenGL2);
 VTK_MODULE_INIT(vtkRenderingVolumeOpenGL2);
 VTK_MODULE_INIT(vtkInteractionStyle);
 VTK_MODULE_INIT(vtkRenderingFreeType);
+
 int main(int argc, char* argv[])
 {
     /* vtkNew<vtkDICOMImageReader> vtkreader;
