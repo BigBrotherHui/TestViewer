@@ -63,6 +63,7 @@ vtkSmartPointer<vtkDICOMReader> asclepios::core::Series::getReaderForAllSingleFr
 	sorter->SetInputFileNames(sinleFramesImages);
 	sorter->Update();
 	newReader->SetFileNames(sorter->GetFileNamesForSeries(0));
+        newReader->SetMemoryRowOrderToFileNative();
 	newReader->SetDataByteOrderToLittleEndian();
 	newReader->Update(0);
 	m_readerSingleFrame = newReader;
@@ -82,6 +83,7 @@ vtkSmartPointer<vtkDICOMMetaData> asclepios::core::Series::getMetaDataForSeries(
 	}
 	vtkNew<vtkDICOMReader> tempReader;
 	tempReader->SetFileName((*m_singleFrameImages.begin())->getImagePath().c_str());
+        tempReader->SetMemoryRowOrderToFileNative();
 	tempReader->Update();
 	m_metaDataSingleFrame->DeepCopy(tempReader->GetMetaData());
 	return m_metaDataSingleFrame;

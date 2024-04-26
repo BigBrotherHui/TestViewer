@@ -8,6 +8,7 @@ vtkSmartPointer<vtkDICOMReader> asclepios::core::Image::getImageReader() const
 	}
 	vtkNew<vtkDICOMReader> m_imageReader;
 	m_imageReader->SetFileName(m_path.c_str());
+        m_imageReader->SetMemoryRowOrderToFileNative();
 	m_imageReader->Update();
 	return m_imageReader;
 }

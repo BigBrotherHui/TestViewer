@@ -20,6 +20,7 @@
 #include <qapplication>
 #include <vtkMetaImageReader.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkPolyDataMapper.h>
 int main(int a, char*c[])
 {
     QApplication app(a, c);
@@ -48,7 +49,7 @@ int main(int a, char*c[])
     skinExtractor->Update();
     // Define a spherical clip function to clip the isosurface
     vtkNew<vtkSphere> clipFunction;
-    clipFunction->SetRadius(50);
+    clipFunction->SetRadius(80);
     clipFunction->SetCenter(skinExtractor->GetOutput()->GetCenter());
 
     // Clip the isosurface with a sphere
@@ -74,11 +75,16 @@ int main(int a, char*c[])
     // Define a model for the "lens". Its geometry matches the implicit
     // sphere used to clip the isosurface
     vtkNew<vtkSphereSource> lensModel;
-    lensModel->SetRadius(50);
+    lensModel->SetRadius(80);
     lensModel->SetCenter(skinExtractor->GetOutput()->GetCenter());
-    lensModel->SetPhiResolution(100);
-    lensModel->SetThetaResolution(100);
-   
+    lensModel->SetPhiResolution(300);
+    lensModel->SetThetaResolution(300);
+    vtkSmartPointer<vtkActor> spa = vtkSmartPointer<vtkActor>::New();
+    vtkSmartPointer<vtkPolyDataMapper> ma = vtkSmartPointer<vtkPolyDataMapper>::New();
+    spa->SetMapper(ma);
+    ma->SetInputConnection(lensModel->GetOutputPort());
+
+
 
     // Sample the input volume with the lens model geometry
     vtkNew<vtkProbeFilter> lensProbe;
@@ -136,6 +142,7 @@ int main(int a, char*c[])
     // thereby enlarging the image.
     aRenderer->AddActor(lens);
     aRenderer->AddActor(skin);
+    //aRenderer->AddActor(spa);
     aRenderer->SetActiveCamera(aCamera);
     aRenderer->ResetCamera();
     aCamera->Dolly(1.5);

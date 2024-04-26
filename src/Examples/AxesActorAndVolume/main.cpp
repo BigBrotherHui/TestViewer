@@ -34,7 +34,11 @@
 #include <vtkMatrix3x3.h>
 #include <vtkMatrix4x4.h>
 #include <QDir>
-
+#include <vtkImageAppend.h>
+#include <vtkImageReslice.h>
+#include <vtkNIFTIWriter.h>
+#include <vtkMetaImageWriter.h>
+#include <vtkNIFTIImageReader.h>
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
 VTK_MODULE_INIT(vtkRenderingVolumeOpenGL2);
 VTK_MODULE_INIT(vtkInteractionStyle);
@@ -118,12 +122,74 @@ int main(int argc, char* argv[])
     itk::ImageToVTKImageFilter<ShortImageType>::Pointer cast = itk::ImageToVTKImageFilter<ShortImageType>::New();
     cast->SetInput(reader->GetOutput());
     cast->Update();
+    vtkNew<vtkNIFTIImageReader> re;
+    re->SetFileName("D:/Images/99549-2.nii");
+    re->Update();
+    qDebug() << re->GetOutput()->GetScalarRange()[1];
+    int highth = 50;
+    vtkNew<vtkImageAppend> appendFilter;
+    appendFilter->SetAppendAxis(1);
+    std::vector<vtkSmartPointer<vtkImageAppend>> vc;
+    vtkSmartPointer<vtkImageAppend> tmpAppend = vtkSmartPointer<vtkImageAppend>::New();
+    tmpAppend->SetAppendAxis(0);
+    vc.push_back(tmpAppend);
+    double m_coronalMatrix[16] = {1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
+    vtkNew<vtkMatrix4x4> coronalMatrix;
+    auto* const extent = re->GetOutput()->GetExtent();
+    double spacing[3];
+    double origin[3];
+    double center[3];
+    re->GetOutput()->GetSpacing(spacing);
+    re->GetOutput()->GetOrigin(origin);
+    center[0] = origin[0] + spacing[0] * 0.5 * (extent[0] + extent[1]);
+    center[1] = origin[1] + spacing[1] * 0.5 * (extent[2] + extent[3]);
+    center[2] = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5]);
+    coronalMatrix->SetElement(0, 3, center[0]);
+    coronalMatrix->SetElement(1, 3, center[1]);
+    coronalMatrix->SetElement(2, 3, /*center[2]*/0);
+    vtkNew<vtkImageReslice> resliceFilter;
+    resliceFilter->SetInputData(re->GetOutput());
+    resliceFilter->SetOutputDimensionality(2);
+    resliceFilter->SetResliceAxes(coronalMatrix);
+    resliceFilter->SetInterpolationModeToLinear();
+    coronalMatrix->DeepCopy(m_coronalMatrix);
+    for (int x = 0; x < highth; ++x) {
+        if (x % 5 == 0 && x!=0) {
+            tmpAppend->Update();
+            appendFilter->AddInputData(tmpAppend->GetOutput());
+            tmpAppend = vtkSmartPointer<vtkImageAppend>::New();
+            tmpAppend->SetAppendAxis(0);
+            vc.push_back(tmpAppend);
+        }
+        // 创建一个切片对象
+        vtkMatrix4x4* matrix = resliceFilter->GetResliceAxes();
+        double point[4];
+        double center[4];
+        point[0] = 0;
+        point[1] = 0;
+        point[2] = spacing[2];
+        point[3] = 1.0;
+        matrix->MultiplyPoint(point, center);
+        matrix->SetElement(0, 3, center[0]);
+        matrix->SetElement(1, 3, center[1]);
+        matrix->SetElement(2, 3, center[2]);
+        resliceFilter->Update();
+        // 将切片添加到拼接器中
+        tmpAppend->AddInputData(resliceFilter->GetOutput());
+    }
+    appendFilter->Update();
+    //qDebug() << appendFilter->GetOutput()->GetScalarRange()[1];
     vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
-    newReader->GetOutput()->Print(std::cout);
+    //newReader->GetOutput()->Print(std::cout);
     qDebug() << "==========================";
-    cast->GetOutput()->Print(std::cout);
-    volumeMapper->SetInputData(newReader->GetOutput());
-
+    //cast->GetOutput()->Print(std::cout);
+    volumeMapper->SetInputData(cast->GetOutput());
+    //vtkNew<vtkMetaImageWriter> ww;
+    //ww->SetInputData(appendFilter->GetOutput());
+    //ww->SetFileName("1111111111.mhd");
+    //ww->SetRAWFileName("1111111111.raw");
+    //ww->Write();
+    //return 0;
     //设置光线采样距离
     // volumeMapper->SetSampleDistance(volumeMapper->GetSampleDistance()*4);
     //设置图像采样步长
