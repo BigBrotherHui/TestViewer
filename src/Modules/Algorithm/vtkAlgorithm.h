@@ -23,4 +23,4 @@ Algorithm_EXPORT vtkSmartPointer<vtkPolyData> extractCollideCellids(vtkPolyData 
                                                                     int &totalCollide, bool caculateAll=false);
 Algorithm_EXPORT void cropImageByPolyData(vtkSmartPointer<vtkImageData> sourceImage,
                                           vtkSmartPointer<vtkImageData> dstImage,
-                                          vtkSmartPointer<vtkPolyData> polydata);
+                                          vtkSmartPointer<vtkPolyData> polydata,bool extractVOI=true);

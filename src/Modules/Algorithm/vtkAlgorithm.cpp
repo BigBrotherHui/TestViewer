@@ -256,7 +256,7 @@ vtkSmartPointer<vtkPolyData> extractCollideCellids(vtkPolyData* input1, vtkPolyD
     return copy;
 }
 void cropImageByPolyData(vtkSmartPointer<vtkImageData> sourceImage, vtkSmartPointer<vtkImageData> dstImage,
-                    vtkSmartPointer<vtkPolyData> polydata)
+                         vtkSmartPointer<vtkPolyData> polydata,bool extract)
 {
     if (!sourceImage || !dstImage || !polydata) {
         return;
@@ -304,13 +304,17 @@ void cropImageByPolyData(vtkSmartPointer<vtkImageData> sourceImage, vtkSmartPoin
     imageStencil->SetBackgroundValue(0);
     imageStencil->Update();
 
-    vtkSmartPointer<vtkExtractVOI> extractVOI = vtkSmartPointer<vtkExtractVOI>::New();
-    extractVOI->SetInputData(imageStencil->GetOutput());
-    extractVOI->SetVOI(indexBounds[0], indexBounds[1], indexBounds[2], indexBounds[3], indexBounds[4],
-                       indexBounds[5]);  // 指定感兴趣区域
-    extractVOI->Update();
+    if (extract)
+    {
+        vtkSmartPointer<vtkExtractVOI> extractVOI = vtkSmartPointer<vtkExtractVOI>::New();
+        extractVOI->SetInputData(imageStencil->GetOutput());
+        extractVOI->SetVOI(indexBounds[0], indexBounds[1], indexBounds[2], indexBounds[3], indexBounds[4],
+                           indexBounds[5]);  // 指定感兴趣区域
+        extractVOI->Update();
 
-    dstImage->DeepCopy(extractVOI->GetOutput());
-
-    return;
+        dstImage->DeepCopy(extractVOI->GetOutput());
+    }
+    else {
+        dstImage->DeepCopy(imageStencil->GetOutput());
+    }
 }

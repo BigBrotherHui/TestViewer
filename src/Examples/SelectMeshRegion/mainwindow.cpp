@@ -25,14 +25,14 @@ public:
         isLeftMousePressed = 1;
         m_points = vtkSmartPointer<vtkPoints>::New();
         cells = vtkSmartPointer<vtkCellArray>::New();
-        // ×¢²áÊ°È¡µãº¯Êý
+        // ×¢ï¿½ï¿½Ê°È¡ï¿½ãº¯ï¿½ï¿½
         this->Interactor->GetPicker()->Pick(
             this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1],
-            0,  //Ö÷Òª»ñÈ¡µÄÊÇ¶þÎ¬Æ½ÃæµÄÏñËØµã×ø±ê
-            this->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer()  //»ñÈ¡vtkrender¶ÔÏó
+            0,  //ï¿½ï¿½Òªï¿½ï¿½È¡ï¿½ï¿½ï¿½Ç¶ï¿½Î¬Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
+            this->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer()  //ï¿½ï¿½È¡vtkrenderï¿½ï¿½ï¿½ï¿½
         );
         screenPoints.push_back(vtkVector2i(this->Interactor->GetEventPosition()));
-        // ´òÓ¡Ê°È¡µã¿Õ¼äÎ»ÖÃ
+        // ï¿½ï¿½Ó¡Ê°È¡ï¿½ï¿½Õ¼ï¿½Î»ï¿½ï¿½
         double picked[3];
         this->Interactor->GetPicker()->GetPickPosition(picked);
         m_points->InsertNextPoint(picked[0], picked[1], picked[2]);
@@ -95,7 +95,9 @@ private:
     bool isLeftMousePressed{false};
 };
 
-vtkStandardNewMacro(PointPickerInteractorStyle1) typedef struct {
+vtkStandardNewMacro(PointPickerInteractorStyle1) 
+
+typedef struct {
 public:
     double x, y, z;
 } POLYGON_VERTEX;
@@ -299,8 +301,8 @@ MainWindow::MainWindow(QWidget *parent)
     vtkNew<vtkCellPicker> picker;
     mwidget->interactor()->SetPicker(picker);
     //mrenderer->SetLightFollowCamera(false);
-    //mrenderer->UseDepthPeelingOff();  // ¹Ø±ÕÉî¶È°þÀë
-    //mrenderer->PreserveDepthBufferOff();  // ¹Ø±ÕÉî¶ÈÅÅÐò
+    //mrenderer->UseDepthPeelingOff();  // ï¿½Ø±ï¿½ï¿½ï¿½È°ï¿½ï¿½ï¿½
+    //mrenderer->PreserveDepthBufferOff();  // ï¿½Ø±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     //actor->GetProperty()->ShadingOff();
 }
