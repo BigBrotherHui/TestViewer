@@ -1,4 +1,5 @@
 macro(tidyFolder)
+
     file(GLOB_RECURSE SOURCE_FILES "*.cpp" "*.cxx" "*.txx")
     file(GLOB_RECURSE HEADER_FILES "*.h")
     file(GLOB_RECURSE UI_FILES "*.ui")

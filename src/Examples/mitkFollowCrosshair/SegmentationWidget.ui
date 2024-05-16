@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SegmentationWidget</class>
+ <widget class="QWidget" name="SegmentationWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>202</width>
+    <height>801</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>SegmentationWidget</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>1. Marker Segmentation</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButtonMarkerSegmentation">
+     <property name="text">
+      <string>Marker Segmentation</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>2. Label</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButtonLabeling">
+     <property name="text">
+      <string>Labeling</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QStackedWidget" name="stackedWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="pageDummy">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Dummy</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pageMarkerSegmentation">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QGroupBox" name="groupBoxCervial">
+         <property name="title">
+          <string>Cervial</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayoutCervial"/>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBoxThracic">
+         <property name="title">
+          <string>Thoracic</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayoutThracic"/>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBoxLumbar">
+         <property name="title">
+          <string>Lumbar</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayoutLumbar"/>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBoxSacral">
+         <property name="title">
+          <string>Sacral</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayoutSacral"/>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>178</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pageLabel">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Label</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

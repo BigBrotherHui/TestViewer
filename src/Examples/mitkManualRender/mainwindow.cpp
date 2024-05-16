@@ -144,7 +144,7 @@ void MainWindow::on_pushButton_addpoint_clicked()
     i++;
     //会闪现一下第5个切层
     //w1->GetRenderer()->GetSliceNavigationController()->SelectSliceByPoint(pt3d);
-    qDebug() << w1->GetRenderer()->GetSliceNavigationController()->GetSlice()->GetPos();
+    //qDebug() << w1->GetRenderer()->GetSliceNavigationController()->GetSlice()->GetPos();
     mitk::Point2D pt2d;
     w1->GetRenderer()->GetCurrentWorldPlaneGeometry()->Map(pt3d, pt2d);
     w1->GetRenderer()->GetCameraController()->MoveCameraToPoint(pt2d);
