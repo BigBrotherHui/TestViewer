@@ -17,6 +17,8 @@
 #include <vtkPointData.h>
 #include <vtkPoints.h>
 #include "vtkAlgorithm.h"
+#include <vtkRenderWindowInteractor.h>
+#include <vtkInteractorStyleImage.h>
 vtkStandardNewMacro(asclepios::gui::vtkResliceWidgetRepresentation);
 
 asclepios::gui::vtkResliceWidgetRepresentation::vtkResliceWidgetRepresentation()
@@ -67,26 +69,26 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 	picker->AddPickList(m_cursorActor->getActorRotate());
 	if (picker->Pick(X, Y, 0, Renderer))
 	{
-        if (picker->GetActor() == m_cursorActor->getActorTranslate()) {
-		auto id=picker->GetPointId();
-		auto v = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
-									->GetInput()
-									->GetPointData()
-									->GetScalars()
-									->GetTuple1(id);
-                if (v == 0) {
-                    return calculateCursorState(m_rotationAngle * 180 / M_PI);
-                }
-                else if (v == 1) {
-                    return calculateCursorState(m_rotationAngle * 180 / M_PI + 90);
-                }
-                else {
-                    return VTK_CURSOR_DEFAULT;
-                }    
-            }
-            else if (picker->GetActor() == m_cursorActor->getActorRotate()) {
-                return VTK_CURSOR_HAND;
-            }
+            if (picker->GetActor() == m_cursorActor->getActorTranslate()) {
+		    auto id=picker->GetPointId();
+		    auto v = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
+									    ->GetInput()
+									    ->GetPointData()
+									    ->GetScalars()
+									    ->GetTuple1(id);
+                if (v == 0 || v == 11 || v==12) {
+		        return calculateCursorState(m_rotationAngle * 180 / M_PI);
+	        }
+	        else if (v == 1) {
+		        return calculateCursorState(m_rotationAngle * 180 / M_PI + 90);
+	        }
+	        else {
+		        return VTK_CURSOR_DEFAULT;
+	        }    
+	    }
+	    else if (picker->GetActor() == m_cursorActor->getActorRotate()) {
+		    return VTK_CURSOR_HAND;
+	    }
 	}
     return VTK_CURSOR_DEFAULT;
 }
@@ -188,7 +190,6 @@ int asclepios::gui::vtkResliceWidgetRepresentation::HasTranslucentPolygonalGeome
 void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double t_angle)
 {
     m_rotationAngle += t_angle;
-    //m_rotationAngle = fmod(m_rotationAngle, M_PI / 4);
     m_cursorActor->getActorRotate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
     m_cursorActor->getActorTranslate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
 }
@@ -209,6 +210,15 @@ void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double 
         m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
         m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
     }
+}
+
+void asclepios::gui::vtkResliceWidgetRepresentation::expand(double x, double y, double z, char moveAxes)
+{
+    /*calculateTranslateY(x, y, m_rotationAngle);
+    double distance = std::sqrt(x * x + y * y);
+    if (y < 0) distance = -distance;
+    getResliceActor()->createWallRepresentation(x, distance, z, moveAxes);*/
+    getResliceActor()->createWallRepresentation(x, y, z, moveAxes);
 }
 
 //-----------------------------------------------------------------------------

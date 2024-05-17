@@ -15,6 +15,7 @@
 #include <vtkRendererCollection.h>
 #include <QApplication>
 #include <vtkPointData.h>
+#include <vtkCamera.h>
 vtkStandardNewMacro(asclepios::gui::vtkReslicePlaneCursorWidget);
 
 double asclepios::gui::vtkReslicePlaneCursorWidget::__lastCursorPos[3]{};
@@ -222,13 +223,19 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseDownAction(vtkAbstrac
 		{
             if (picker->GetActor() == resliceActor->getActorTranslate())
 			{
-			    self->m_state = translate;
 				auto id=picker->GetPointId();
-				self->m_selectedAxis = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
+				int value=static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
 											->GetInput()
 											->GetPointData()
 											->GetScalars()
 											->GetTuple1(id);
+                                if (value == 0 || value == 1) {
+				    self->m_state = translate;
+				}
+				else if(value==11 || value==12){
+				    self->m_state=expand;
+				}
+                                self->m_selectedAxis = value;
 			}
 			else if(picker->GetActor() == resliceActor->getActorRotate()){
 				self->m_state = rotate;
@@ -274,34 +281,48 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::moveMouse(vtkAbstractWidget* w
 	    case translate:
 	    {
 	        auto renderer = self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
-			vtkNew<vtkCoordinate> coordinate;
-			coordinate->SetCoordinateSystemToDisplay();
-			coordinate->SetValue(x, y);
-			double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
-			double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};	
-			coordinate->SetValue(lastX, lastY);
-			double* lastworldCoordinate = coordinate->GetComputedWorldValue(renderer);
-			self->translateCursor(cd[0] - lastworldCoordinate[0], cd[1] - lastworldCoordinate[1],
-									cd[2] - lastworldCoordinate[2],self->m_selectedAxis);
-			auto* const representation = dynamic_cast<vtkResliceWidgetRepresentation*>(self->WidgetRep);
-			double pos[3] = {0.00, 0.00, 0.00};
-			pos[0] = representation->getResliceActor()->getActorTranslate()->GetPosition()[0] - __lastCursorPos[0];
-			pos[1] = representation->getResliceActor()->getActorTranslate()->GetPosition()[1] - __lastCursorPos[1];
-			pos[2] = representation->getResliceActor()->getActorTranslate()->GetPosition()[2] - __lastCursorPos[2];
-			self->InvokeEvent(cursorMove, pos);
+		vtkNew<vtkCoordinate> coordinate;
+		coordinate->SetCoordinateSystemToDisplay();
+		coordinate->SetValue(x, y);
+		double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
+		double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};	
+		coordinate->SetValue(lastX, lastY);
+		double* lastworldCoordinate = coordinate->GetComputedWorldValue(renderer);
+		self->translateCursor(cd[0] - lastworldCoordinate[0], cd[1] - lastworldCoordinate[1],
+								cd[2] - lastworldCoordinate[2],self->m_selectedAxis);
+		auto* const representation = dynamic_cast<vtkResliceWidgetRepresentation*>(self->WidgetRep);
+		double pos[3] = {0.00, 0.00, 0.00};
+		pos[0] = representation->getResliceActor()->getActorTranslate()->GetPosition()[0] - __lastCursorPos[0];
+		pos[1] = representation->getResliceActor()->getActorTranslate()->GetPosition()[1] - __lastCursorPos[1];
+		pos[2] = representation->getResliceActor()->getActorTranslate()->GetPosition()[2] - __lastCursorPos[2];
+		self->InvokeEvent(cursorMove, pos);
 	    }
 	    break;
 	    case rotate:
 	    {
-		    double* centerActor = rep->getResliceActor()->getActorRotate()->GetPosition();
-		    actorCoordinates->SetCoordinateSystemToWorld();
-		    actorCoordinates->SetValue(centerActor[0], centerActor[1]);
-		    const auto* center = actorCoordinates->GetComputedDisplayValue(self->CurrentRenderer);
-		    const auto newAngle = atan2(y - center[1], x - center[0]);
-		    const auto oldAngle = atan2(lastY - center[1], lastX - center[0]);
-		    self->rotateCursor(newAngle - oldAngle);
-		    double angle[1] = {vtkMath::DegreesFromRadians(newAngle - oldAngle)};
-		    self->InvokeEvent(cursorRotate, angle);
+		double* centerActor = rep->getResliceActor()->getActorRotate()->GetPosition();
+		actorCoordinates->SetCoordinateSystemToWorld();
+		actorCoordinates->SetValue(centerActor[0], centerActor[1]);
+		const auto* center = actorCoordinates->GetComputedDisplayValue(self->CurrentRenderer);
+		const auto newAngle = atan2(y - center[1], x - center[0]);
+		const auto oldAngle = atan2(lastY - center[1], lastX - center[0]);
+		self->rotateCursor(newAngle - oldAngle);
+		double angle[1] = {vtkMath::DegreesFromRadians(newAngle - oldAngle)};
+		self->InvokeEvent(cursorRotate, angle);
+	    }
+	    break;
+	    case expand:{
+                auto renderer = self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+                vtkNew<vtkCoordinate> coordinate;
+                coordinate->SetCoordinateSystemToDisplay();
+                coordinate->SetValue(x, y);
+                double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
+                double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};
+                coordinate->SetValue(lastX, lastY);
+                double* lastworldCoordinate = coordinate->GetComputedWorldValue(renderer);
+                //self->expandWall(cd[0]-lastworldCoordinate[0], cd[1]-lastworldCoordinate[1], cd[2]-lastworldCoordinate[2],self->m_selectedAxis);
+                self->expandWall(cd[0] , cd[1],cd[2] , self->m_selectedAxis);
+
 	    }
 	    break;
 	default:
@@ -334,6 +355,11 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::rotateCursor(double t_angle) c
 void asclepios::gui::vtkReslicePlaneCursorWidget::translateCursor(double x, double y,double z, char moveAxes) const
 {
     dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep)->translate(x, y,z, moveAxes);
+}
+
+void asclepios::gui::vtkReslicePlaneCursorWidget::expandWall(double x,double y,double z, char moveAxes) const
+{
+    dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep)->expand(x,y,z, moveAxes);
 }
 
 //-----------------------------------------------------------------------------

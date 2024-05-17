@@ -20,7 +20,7 @@ namespace asclepios::gui
 		//getters
                 [[nodiscard]] vtkActor* getActorTranslate() const { return m_actorTranslate; }
                 [[nodiscard]] vtkActor* getActorRotate() const { return m_actorRotate; }
-		vtkSmartPointer<vtkAppendPolyData> append;
+                vtkSmartPointer<vtkAppendPolyData> append;
 		[[nodiscard]] vtkMTimeType getLineTime() const { return m_cursorLines[0]->GetMTime(); }
 
 		//setters
@@ -28,12 +28,24 @@ namespace asclepios::gui
 		void setDisplaySize(const double* t_size);
 		void setDisplayOriginPoint(const double* t_point);
 		void setCenterPosition(const double* t_center);
-
+                double* getCenterPosition();
 		void createActor();
 		void update();
 		void reset() const;
 		void createColors(double* t_color1, double* t_color2);
-
+                void createWallRepresentation(double x,double y,double z,int value=0);
+                double getWallSpacing()
+                { return m_wallSpacing;
+                }
+                int getImageNumFront()
+                { return m_imageNumFront; 
+                }
+                int getImageNumBack()
+                { return m_imageNumBack;
+                }
+                double getActorScale()
+                { return actorScale;
+                }
 	private:
                 vtkSmartPointer<vtkAppendPolyData> m_appenderTranslate = {}, m_appenderRotate = {};
                 vtkSmartPointer<vtkActor> m_actorRotate = {}, m_actorTranslate = {};
@@ -49,6 +61,10 @@ namespace asclepios::gui
                 vtkSmartPointer<vtkPolyData> arrowTop2 = vtkSmartPointer<vtkPolyData>::New();
                 vtkSmartPointer<vtkPolyData> arrowLeft1 = vtkSmartPointer<vtkPolyData>::New();
                 vtkSmartPointer<vtkPolyData> arrowLeft2 = vtkSmartPointer<vtkPolyData>::New();
-
+                vtkSmartPointer<vtkPolyData> polydataWall = vtkSmartPointer<vtkPolyData>::New();
+                double m_wallSpacing{1};
+                int m_imageNumFront{10};
+                int m_imageNumBack{10};
+                double actorScale = 5;
 	};
 }

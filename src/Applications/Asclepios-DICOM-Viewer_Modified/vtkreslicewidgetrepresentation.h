@@ -32,6 +32,7 @@ namespace asclepios::gui
 
 		void rotate(double t_angle);
                 void translate(double x, double y,double z, char moveAxes);
+                void expand(double x, double y, double z, char moveAxes);
 		void setPlane(int t_plane);
 
 		void setCursorPosition(double* t_position);
