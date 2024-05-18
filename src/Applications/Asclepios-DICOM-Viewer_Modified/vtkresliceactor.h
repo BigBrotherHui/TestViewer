@@ -7,6 +7,7 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkTransformFilter.h>
 #include <vtkContourFilter.h>
+#include <vtkAssembly.h>
 namespace asclepios::gui
 {
 	class vtkResliceActor final : public vtkObject
@@ -20,6 +21,7 @@ namespace asclepios::gui
 		//getters
                 [[nodiscard]] vtkActor* getActorTranslate() const { return m_actorTranslate; }
                 [[nodiscard]] vtkActor* getActorRotate() const { return m_actorRotate; }
+                vtkAssembly* getActorText() const { return textActor; }
                 vtkSmartPointer<vtkAppendPolyData> append;
 		[[nodiscard]] vtkMTimeType getLineTime() const { return m_cursorLines[0]->GetMTime(); }
 
@@ -66,5 +68,6 @@ namespace asclepios::gui
                 int m_imageNumFront{10};
                 int m_imageNumBack{10};
                 double actorScale = 5;
+                vtkSmartPointer<vtkAssembly> textActor{nullptr};
 	};
 }

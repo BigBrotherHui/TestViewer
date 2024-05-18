@@ -51,6 +51,7 @@ enum vtkCustomEvents : unsigned long
 	imageChanged = cursorRotate + 1,
 	qualityLow = imageChanged + 1,
 	qualityHigh = qualityLow + 1,
+	reslice
 };
 
 namespace asclepios::core

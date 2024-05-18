@@ -19,7 +19,10 @@
 #include <vtkLine.h>
 #include <vtkCardinalSpline.h>
 #include <vtkSplineFilter.h>
-#include <Eigen/Eigen>
+#include <vtkVectorText.h>
+#include <vtkTransform.h>
+#include <vtkTransformFilter.h>
+#include <vtkFollower.h>
 vtkStandardNewMacro(asclepios::gui::vtkResliceActor);
 namespace {
 void AssignScalarValueTo(vtkPolyData* polydata, char value)
@@ -96,63 +99,40 @@ vtkSmartPointer<vtkPolyData> ExpandSpline(vtkPolyData *line, int divisionNum, do
 
     return polyData;
 }
-vtkSmartPointer<vtkPolyData> SweepLine_2Sides(vtkPolyData *line, double direction[3], double distance,
-                                                          unsigned cols)
+
+vtkSmartPointer<vtkActor> createTextActor(const std::string &text,double *position,double scale)
 {
-    unsigned int rows = line->GetNumberOfPoints();
-    double spacing = distance / cols;
-    vtkNew<vtkPolyData> surface;
+    vtkSmartPointer<vtkVectorText> atext = vtkSmartPointer<vtkVectorText>::New();
+    atext->SetText(text.c_str());
+    vtkSmartPointer<vtkPolyDataMapper> textMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    textMapper->SetInputConnection(atext->GetOutputPort());
 
-    // Generate the points.
-    cols++;
-    unsigned int numberOfPoints = rows * cols;
-    unsigned int numberOfPolys = (rows - 1) * (cols - 1);
-    vtkNew<vtkPoints> points;
-    points->Allocate(numberOfPoints);
-    vtkNew<vtkCellArray> polys;
-    polys->Allocate(numberOfPolys * 4);
-
-    double x[3];
-    unsigned int cnt = 0;
-    for (unsigned int row = 0; row < rows; row++) {
-        for (unsigned int col = 0; col < cols; col++) {
-            double p[3];
-            line->GetPoint(row, p);
-            x[0] = p[0] - distance * direction[0] / 2 + direction[0] * col * spacing;
-            x[1] = p[1] - distance * direction[1] / 2 + direction[1] * col * spacing;
-            x[2] = p[2] - distance * direction[2] / 2 + direction[2] * col * spacing;
-            points->InsertPoint(cnt++, x);
-        }
-    }
-    // Generate the quads.
-    vtkIdType pts[4];
-    for (unsigned int row = 0; row < rows - 1; row++) {
-        for (unsigned int col = 0; col < cols - 1; col++) {
-            pts[0] = col + row * (cols);
-            pts[1] = pts[0] + 1;
-            pts[2] = pts[0] + cols + 1;
-            pts[3] = pts[0] + cols;
-            polys->InsertNextCell(4, pts);
-        }
-    }
-    surface->SetPoints(points);
-    surface->SetPolys(polys);
-
-    return surface;
+    vtkSmartPointer<vtkFollower> textActor = vtkSmartPointer<vtkFollower>::New();
+    textActor->SetMapper(textMapper);
+    textActor->SetScale(scale);
+    textActor->SetPosition(position);
+    textActor->GetProperty()->SetColor(0, 0, 1);
+    return textActor;
 }
 }  // namespace
 void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double y, double z,int value)
 {
+    double* ori{nullptr};
+    if (textActor)
+        ori = textActor->GetOrientation();
+    textActor = vtkSmartPointer<vtkAssembly>::New();
+    if (ori)
+        textActor->RotateZ(ori[2]);
     vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
     vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
     lines->InsertNextCell(2);
-    double *center=m_centerPointDisplayPosition;
+    double center[3]{0, 0, 0};
     double centerLeft[3]{0, 0, 0}, centerRight[3]{0, 0, 0};
     for (int i = 0; i < 2; ++i) {
         centerLeft[i] = center[i];
         centerRight[i] = center[i];
     }
-    double bound = 1000;
+    double bound = 2000;
     centerLeft[0] -= bound;
     centerRight[0] += bound;
     points->InsertNextPoint(centerLeft);
@@ -163,10 +143,6 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
     p->SetPoints(points);
     p->SetLines(lines);
 
-    //if (value==11) 
-    //    m_imageNumBack += y / actorScale/m_wallSpacing;
-    //else if (value==12)
-    //    m_imageNumFront += -y / actorScale / m_wallSpacing;
     if (value == 11)
         m_imageNumBack = y / actorScale / m_wallSpacing;
     else if (value == 12)
@@ -176,6 +152,11 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
         double stepSize = m_wallSpacing * (-m_imageNumFront + i);
         auto expandedSpline = ExpandSpline(p, p->GetNumberOfPoints() - 1, stepSize);
         append1->AddInputData(expandedSpline);
+
+        if (i % 2) {
+            double pos[3]{10, -i * m_wallSpacing * actorScale - actorScale / 2, 0};
+            textActor->AddPart(createTextActor(std::to_string(i), pos, actorScale));
+        }
     }
     append1->Update();
     if (append1->GetOutput()) {
@@ -192,6 +173,11 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
         double stepSize = m_wallSpacing * (i + 1);
         auto expandedSpline = ExpandSpline(p, p->GetNumberOfPoints() - 1, stepSize);
         append2->AddInputData(expandedSpline);
+
+        if (i % 2) {
+            double pos[3]{10, i * m_wallSpacing*actorScale - actorScale / 2, 0};
+            textActor->AddPart(createTextActor(std::to_string(i), pos, actorScale));
+        }
     }
     append2->Update();
     if (append2->GetOutput()) {
@@ -275,6 +261,8 @@ void asclepios::gui::vtkResliceActor::reset() const
     m_actorTranslate->SetPosition(0, 0, 0);
     m_actorRotate->RotateZ(-orientation[2]);
     m_actorRotate->SetPosition(0, 0, 0);
+    textActor->RotateZ(-orientation[2]);
+    textActor->SetPosition(0, 0, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -349,63 +337,6 @@ vtkSmartPointer<vtkPolyData> CreateArrow(bool leftforward, std::array<double, 3>
     ret->SetPoints(points);
     ret->SetLines(lines);
     return ret;
-    //vtkSmartPointer<vtkPolyData> polyData;
-
-    //// Create an arrow.
-    //vtkNew<vtkArrowSource> arrowSource;
-    //arrowSource->SetShaftRadius(pdLength * .01);
-    //arrowSource->SetShaftResolution(20);
-    //arrowSource->SetTipLength(pdLength * .1);
-    //arrowSource->SetTipRadius(pdLength * .05);
-    //arrowSource->SetTipResolution(20);
-
-    //// Compute a basis
-    //std::array<double, 3> normalizedX;
-    //std::array<double, 3> normalizedY;
-    //std::array<double, 3> normalizedZ;
-
-    //// The X axis is a vector from start to end
-    //vtkMath::Subtract(endPoint.data(), startPoint.data(), normalizedX.data());
-    //double length = vtkMath::Norm(normalizedX.data());
-    //vtkMath::Normalize(normalizedX.data());
-
-    //// The Z axis is an arbitrary vector cross X
-    //vtkNew<vtkMinimalStandardRandomSequence> rng;
-    //rng->SetSeed(8775070);
-
-    //std::array<double, 3> arbitrary;
-    //for (auto i = 0; i < 3; ++i) {
-    //    rng->Next();
-    //    arbitrary[i] = rng->GetRangeValue(-10, 10);
-    //}
-    //vtkMath::Cross(normalizedX.data(), arbitrary.data(), normalizedZ.data());
-    //vtkMath::Normalize(normalizedZ.data());
-
-    //// The Y axis is Z cross X
-    //vtkMath::Cross(normalizedZ.data(), normalizedX.data(), normalizedY.data());
-    //vtkNew<vtkMatrix4x4> matrix;
-
-    //// Create the direction cosine matrix
-    //matrix->Identity();
-    //for (auto i = 0; i < 3; i++) {
-    //    matrix->SetElement(i, 0, normalizedX[i]);
-    //    matrix->SetElement(i, 1, normalizedY[i]);
-    //    matrix->SetElement(i, 2, normalizedZ[i]);
-    //}
-
-    //// Apply the transforms
-    //vtkNew<vtkTransform> transform;
-    //transform->Translate(startPoint.data());
-    //transform->Concatenate(matrix);
-    //transform->Scale(length, length, length);
-
-    //// Transform the polydata
-    //vtkNew<vtkTransformPolyDataFilter> transformPD;
-    //transformPD->SetTransform(transform);
-    //transformPD->SetInputConnection(arrowSource->GetOutputPort());
-    //transformPD->Update();
-    //polyData = transformPD->GetOutput();
-    //return polyData;
 }
 //-----------------------------------------------------------------------------
 void asclepios::gui::vtkResliceActor::update()

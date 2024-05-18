@@ -169,6 +169,7 @@ int asclepios::gui::vtkResliceWidgetRepresentation::RenderOpaqueGeometry(
 	{
             m_cursorActor->getActorTranslate()->RenderOpaqueGeometry(viewport);
 			m_cursorActor->getActorRotate()->RenderOpaqueGeometry(viewport);
+			m_cursorActor->getActorText()->RenderOpaqueGeometry(viewport);
 	}
 	else
 	{
@@ -192,6 +193,7 @@ void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double t_angle)
     m_rotationAngle += t_angle;
     m_cursorActor->getActorRotate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
     m_cursorActor->getActorTranslate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
+	m_cursorActor->getActorText()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
 }
 
 void asclepios::gui::vtkResliceWidgetRepresentation::reset(){
@@ -204,21 +206,27 @@ void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double 
         calculateTranslateX(x, y, m_rotationAngle);
         m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
         m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
+		m_cursorActor->getActorText()->AddPosition(x, y, 0);
     }   
     else {
         calculateTranslateY(x, y, m_rotationAngle);
         m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
         m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
+		m_cursorActor->getActorText()->AddPosition(x, y, 0);
     }
 }
 
 void asclepios::gui::vtkResliceWidgetRepresentation::expand(double x, double y, double z, char moveAxes)
 {
-    /*calculateTranslateY(x, y, m_rotationAngle);
-    double distance = std::sqrt(x * x + y * y);
-    if (y < 0) distance = -distance;
-    getResliceActor()->createWallRepresentation(x, distance, z, moveAxes);*/
-    getResliceActor()->createWallRepresentation(x, y, z, moveAxes);
+    double diff[3];
+    diff[0] = x - getResliceActor()->getCenterPosition()[0];
+    diff[1] = y - getResliceActor()->getCenterPosition()[1];
+    diff[2] = z - getResliceActor()->getCenterPosition()[2];
+    calculateTranslateY(diff[0], diff[1], m_rotationAngle);
+    double distance = std::sqrt(diff[0] * diff[0] + diff[1] * diff[1]);
+    if (diff[1] < 0 && moveAxes==11) return;
+    if (diff[1] < 0) distance = -distance;
+    getResliceActor()->createWallRepresentation(x, distance, z, moveAxes);
 }
 
 //-----------------------------------------------------------------------------

@@ -318,11 +318,7 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::moveMouse(vtkAbstractWidget* w
                 coordinate->SetValue(x, y);
                 double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
                 double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};
-                coordinate->SetValue(lastX, lastY);
-                double* lastworldCoordinate = coordinate->GetComputedWorldValue(renderer);
-                //self->expandWall(cd[0]-lastworldCoordinate[0], cd[1]-lastworldCoordinate[1], cd[2]-lastworldCoordinate[2],self->m_selectedAxis);
                 self->expandWall(cd[0] , cd[1],cd[2] , self->m_selectedAxis);
-
 	    }
 	    break;
 	default:
