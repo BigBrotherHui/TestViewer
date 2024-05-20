@@ -40,6 +40,13 @@
 #include <mitkAffineBaseDataInteractor3D.h>
 #include "PlanningWidget.h"
 #include "BoneSegmentationWidget.h"
+#include <vtkTransform.h>
+#include <vtkLinearTransform.h>
+#include <mitkSlicedGeometry3D.h>
+#include <mitkBaseGeometry.h>
+#include <mitkPlaneOperation.h>
+#include <mitkInteractionConst.h>
+#include <mitkRotationOperation.h>
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::MainWindow)
@@ -76,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent)
     w1->GetRenderWindow3()->GetSliceNavigationController()->AddObserver(
         mitk::SliceNavigationController::GeometryUpdateEvent(nullptr, 0), command);*/
 
-    mitk::DataNode::Pointer node = mitk::DataNode::New();
+    /*mitk::DataNode::Pointer node = mitk::DataNode::New();
     mitk::Surface::Pointer sur = mitk::Surface::New();
     node->SetData(sur);
     node->SetName("cylinder");
@@ -87,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
     source->SetRadius(30);
     source->Update();
     sur->SetVtkPolyData(source->GetOutput());
-    ds1->Add(node);
+    ds1->Add(node);*/
     mitk::PointSet::Pointer ps = mitk::PointSet::New();
     mitk::DataNode::Pointer psnode = mitk::DataNode::New();
     psnode->SetData(ps);
@@ -141,7 +148,7 @@ void MainWindow::ModifyObserved(const itk::EventObject& geometryUpdateEvent)
     /*for (int i = 0; i < w1->GetNumberOfRenderWindowWidgets(); ++i) {
         w1->GetRenderWindow(i)->GetSliceNavigationController()->AdjustSliceStepperRange();
     }*/
-    ds1->GetNamedNode("cylinder")->GetData()->GetGeometry()->SetIndexToWorldTransformByVtkMatrix(vmt);
+    //ds1->GetNamedNode("cylinder")->GetData()->GetGeometry()->SetIndexToWorldTransformByVtkMatrix(vmt);
     /*auto mt = vtkSmartPointer<vtkMatrix4x4>::New();
     mt->SetElement(0, 3, w1->GetSelectedPosition("")[0]);
     mt->SetElement(1, 3, w1->GetSelectedPosition("")[1]);
@@ -200,34 +207,34 @@ void MainWindow::on_pushButton_loaddata_clicked()
         std::cerr << e.what() << '\n';
         return;
     }
-    auto* image = ds1->GetNamedObject<mitk::Image>("image");
+    /*auto* image = ds1->GetNamedObject<mitk::Image>("image");
     auto center = image->GetGeometry()->GetCenter();
     mitk::Vector3D translate(center.GetVnlVector());
 
     auto node = ds1->GetNamedNode("cylinder");
     auto* data = node->GetData();
-    data->GetGeometry()->Translate(translate);
+    data->GetGeometry()->Translate(translate);*/
 
-    node->SetBoolProperty("pickable", true);
+    /*node->SetBoolProperty("pickable", true);
 
     auto affineDataInteractor = mitk::AffineBaseDataInteractor3D::New();
     affineDataInteractor->LoadStateMachine("AffineInteraction3D.xml",
                                            us::ModuleRegistry::GetModule("MitkDataTypesExt"));
     affineDataInteractor->SetEventConfig("AffineMouseConfig.xml", us::ModuleRegistry::GetModule("MitkDataTypesExt"));
-    affineDataInteractor->SetDataNode(node);
+    affineDataInteractor->SetDataNode(node);*/
 
 
-    BoneSegmentationWidget* w2 = new BoneSegmentationWidget;
-    w2->show();
+    /*BoneSegmentationWidget* w2 = new BoneSegmentationWidget;
+    w2->show();*/
     mitk::RenderingManager::GetInstance()->InitializeViewsByBoundingObjects(ds1);
     w1->ResetCrosshair();
 
     /*vtkPolyData* source =
         static_cast<mitk::Surface*>(ds1->GetNamedNode("cylinder")->GetData())->GetVtkPolyData();
     w1->SetSelectedPosition(mitk::Point3D(source->GetCenter()), "");
-    w1->RequestUpdateAll();
+    w1->RequestUpdateAll();*/
 
-    vtkNew<vtkTransform> trans;
+    /*vtkNew<vtkTransform> trans;
     vtkNew<vtkMatrix4x4> vmt;
     vmt->SetElement(0, 1, 0);
     vmt->SetElement(1, 1, 0);
@@ -240,12 +247,45 @@ void MainWindow::on_pushButton_loaddata_clicked()
     vmt->SetElement(2, 3, source->GetCenter()[2]);
     
     trans->SetMatrix(vmt);
-    trans->RotateX(30);
+    trans->RotateX(180);
     auto mt=trans->GetMatrix();
     mitk::Vector3D normal;
     normal.SetElement(0, mt->GetElement(0,1));
     normal.SetElement(1, mt->GetElement(1, 1));
-    normal.SetElement(2, mt->GetElement(2, 1));
-    w1->GetRenderWindow1()->GetSliceNavigationController()->ReorientSlices(mitk::Point3D(source->GetCenter()), normal);
-    w1->RequestUpdateAll();*/
+    normal.SetElement(2, mt->GetElement(2, 1));*/
+    auto center =
+        w1->GetRenderWindow1()->GetRenderer()->GetSliceNavigationController()->GetCurrentGeometry3D()->GetCenter();
+    auto axis =
+        w1->GetRenderWindow1()->GetRenderer()->GetSliceNavigationController()->GetCurrentGeometry3D()->GetAxisVector(2);
+    auto matrix=w1->GetRenderWindow1()->GetRenderer()->GetSliceNavigationController()->GetCurrentGeometry3D()->GetVtkTransform()->GetMatrix();
+    auto spacing=w1->GetRenderWindow1()->GetRenderer()->GetSliceNavigationController()->GetCurrentGeometry3D()->GetSpacing();
+    auto origin =
+        w1->GetRenderWindow1()->GetRenderer()->GetSliceNavigationController()->GetCurrentGeometry3D()->GetOrigin();
+    //for (int i = 0; i < 3; ++i) {
+    //    matrix->SetElement(i, 0, matrix->GetElement(i, 0) / spacing[i]);
+    //    matrix->SetElement(i, 1, matrix->GetElement(i, 1) / spacing[i]);
+    //    matrix->SetElement(i, 2, matrix->GetElement(i, 2) / spacing[i]);
+    //}
+    //matrix->Print(std::cout);
+    /*std::cout << center[0] << " " << center[1] << " "
+              << center[2]<<std::endl;
+    std::cout << axis[0] << " " << axis[1] << " " << axis[2] << std::endl;
+    std::cout << origin[0] << " " << origin[1] << " " << origin[2] << std::endl;
+    
+    auto transform = vtkSmartPointer<vtkTransform>::New();
+    transform->SetMatrix(matrix);
+    transform->Translate(origin[0], origin[1], origin[2]);
+    transform->RotateZ(30);
+    transform->Translate(-origin[0], -origin[1], -origin[2]);
+    matrix->DeepCopy(transform->GetMatrix());
+    w1->GetRenderWindow1()->GetRenderer()->GetSliceNavigationController()->GetCurrentGeometry3D()->Modified();*/
+    auto slicenavigationcontroller = w1->GetRenderWindow1()->GetRenderer()->GetSliceNavigationController();
+    auto geometry=slicenavigationcontroller->GetCreatedWorldGeometry();
+    mitk::RotationOperation op(mitk::OpROTATE, slicenavigationcontroller->GetCurrentGeometry3D()->GetCenter(),
+                            slicenavigationcontroller->GetCurrentGeometry3D()->GetAxisVector(2),180);
+    geometry->ExecuteOperation(&op);
+    
+    
+    //w1->GetRenderWindow1()->GetSliceNavigationController()->ReorientSlices(mitk::Point3D(source->GetCenter()), normal);
+    //w1->RequestUpdateAll();
 }
