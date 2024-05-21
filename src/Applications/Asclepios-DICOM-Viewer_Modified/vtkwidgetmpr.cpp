@@ -8,27 +8,47 @@
 #include <vtkImageData.h>
 #include <vtkDICOMMetaData.h>
 #include <vtkScalarsToColors.h>
+#include "LatticeWidget.h"
 
+class Callback : public vtkCommand {
+public:
+    static Callback* New()
+    { return new Callback;
+    }
+    vtkTypeMacro(Callback, vtkCommand);
+    void Execute(vtkObject* caller, unsigned long eventId, void* callData) override
+    {
+        std::array<std::array<double, 3>, 3> position = *static_cast<std::array<std::array<double, 3>, 3> *>(callData);
+        m_latticewidget->centerImageActors(position);
+        m_latticewidget->Render();
+    }
+    LatticeWidget* m_latticewidget;
+};
 
 asclepios::gui::vtkWidgetMPR::~vtkWidgetMPR()
 {
-	for (int i = 0; i < 3; ++i)
-	{
-		m_renderWindows[i]->RemoveObserver(m_callbackTags[i]);
-	}
+    for (int i = 0; i < 3; ++i)
+    {
+	    m_renderWindows[i]->RemoveObserver(m_callbackTags[i]);
+    }
+    if (m_latticewidget)
+    {
+        m_latticewidget->deleteLater();
+        m_latticewidget = nullptr;
+    } 
 }
 
 //-----------------------------------------------------------------------------
 int asclepios::gui::vtkWidgetMPR::getNumberOfRenderWindow(vtkRenderWindow* t_window) const
 {
-	for (auto i = 0; i < 3; ++i)
-	{
-		if (m_renderWindows[i] == t_window)
-		{
-			return i;
-		}
-	}
-	return -1;
+    for (auto i = 0; i < 3; ++i)
+    {
+	    if (m_renderWindows[i] == t_window)
+	    {
+		    return i;
+	    }
+    }
+    return -1;
 }
 
 //-----------------------------------------------------------------------------
@@ -165,6 +185,7 @@ void asclepios::gui::vtkWidgetMPR::initializeWidget()
 			window = vtkSmartPointer<vtkRenderWindow>::New();
 		}
 	}
+        m_latticewidget = new LatticeWidget;
 }
 
 //-----------------------------------------------------------------------------
@@ -180,7 +201,13 @@ void asclepios::gui::vtkWidgetMPR::createResliceWidget()
 		m_mprMaker->getImageReslice(0),
 		m_mprMaker->getImageReslice(1),
 		m_mprMaker->getImageReslice(2));
+        m_latticewidget->setImageReslicers(m_mprMaker->getImageReslice(0), m_mprMaker->getImageReslice(1),
+                                           m_mprMaker->getImageReslice(2));
+        m_latticewidget->show();
 	m_resliceWidget->SetInteractor(m_renderWindows[0]->GetInteractor());
+        vtkSmartPointer<Callback> callback=vtkSmartPointer<Callback>::New();
+        callback->m_latticewidget = m_latticewidget;
+        m_resliceWidget->AddObserver(cursorFinishMovement,callback);
 	m_resliceWidget->SetEnabled(1);
 	m_resliceWidget->setVisible(false);
 }

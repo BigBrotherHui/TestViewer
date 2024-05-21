@@ -3,7 +3,9 @@
 #include <vtkDICOMSorter.h>
 #include <vtkDICOMMetaData.h>
 #include <vtkStringArray.h>
-
+#include <vtkMatrix3x3.h>
+#include <vtkMatrix4x4.h>
+#include <vtkImageData.h>
 asclepios::core::Image* asclepios::core::Series::getNextSingleFrameImage(Image* t_image)
 {
 	if (t_image->equal(m_singleFrameImages.rbegin()->get()))
@@ -46,7 +48,7 @@ vtkSmartPointer<vtkDICOMReader> asclepios::core::Series::getReaderForAllSingleFr
 {
 	if (m_readerSingleFrame)
 	{
-		return vtkSmartPointer<vtkDICOMReader>(m_readerSingleFrame);
+	    return vtkSmartPointer<vtkDICOMReader>(m_readerSingleFrame);
 	}
 	vtkNew<vtkDICOMReader> newReader;
 	vtkNew<vtkStringArray> sinleFramesImages;
@@ -54,18 +56,32 @@ vtkSmartPointer<vtkDICOMReader> asclepios::core::Series::getReaderForAllSingleFr
 	int count = 0;
 	for (const auto& image : m_singleFrameImages)
 	{
-		const auto path = image->getImagePath();
-		if (!path.empty())
-		{
-			sinleFramesImages->InsertValue(count++, path);
-		}
+	    const auto path = image->getImagePath();
+	    if (!path.empty())
+	    {
+		sinleFramesImages->InsertValue(count++, path);
+	    }
 	}
 	sorter->SetInputFileNames(sinleFramesImages);
 	sorter->Update();
 	newReader->SetFileNames(sorter->GetFileNamesForSeries(0));
-        newReader->SetMemoryRowOrderToFileNative();
-	newReader->SetDataByteOrderToLittleEndian();
+         /*newReader->SetMemoryRowOrderToFileNative();
+         newReader->SetDataByteOrderToLittleEndian();*/
 	newReader->Update(0);
+	vtkSmartPointer<vtkMatrix3x3> vmt = vtkSmartPointer<vtkMatrix3x3>::New();
+        for (int i=0;i<3;++i)
+        {
+            for (int j=0;j<3;++j)
+            {
+                vmt->SetElement(i, j, newReader->GetPatientMatrix()->GetElement(i, j));
+            }
+        }
+
+        newReader->GetOutput()->SetDirectionMatrix(vmt);
+        newReader->GetOutput()->SetOrigin(newReader->GetPatientMatrix()->GetElement(0, 3),
+                                          newReader->GetPatientMatrix()->GetElement(1, 3),
+                                          newReader->GetPatientMatrix()->GetElement(2,3));
+
 	m_readerSingleFrame = newReader;
 	return vtkSmartPointer<vtkDICOMReader>(newReader);
 }
@@ -83,7 +99,7 @@ vtkSmartPointer<vtkDICOMMetaData> asclepios::core::Series::getMetaDataForSeries(
 	}
 	vtkNew<vtkDICOMReader> tempReader;
 	tempReader->SetFileName((*m_singleFrameImages.begin())->getImagePath().c_str());
-        tempReader->SetMemoryRowOrderToFileNative();
+	// tempReader->SetMemoryRowOrderToFileNative();
 	tempReader->Update();
 	m_metaDataSingleFrame->DeepCopy(tempReader->GetMetaData());
 	return m_metaDataSingleFrame;

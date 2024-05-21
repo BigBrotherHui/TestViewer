@@ -1,5 +1,7 @@
 #include "image.h"
-
+#include <vtkMatrix3x3.h>
+#include <vtkMatrix4x4.h>
+#include <vtkImageData.h>
 vtkSmartPointer<vtkDICOMReader> asclepios::core::Image::getImageReader() const
 {
 	if (m_imageReader)
@@ -8,8 +10,20 @@ vtkSmartPointer<vtkDICOMReader> asclepios::core::Image::getImageReader() const
 	}
 	vtkNew<vtkDICOMReader> m_imageReader;
 	m_imageReader->SetFileName(m_path.c_str());
-        m_imageReader->SetMemoryRowOrderToFileNative();
+    // m_imageReader->SetMemoryRowOrderToFileNative();
 	m_imageReader->Update();
+	vtkSmartPointer<vtkMatrix3x3> vmt = vtkSmartPointer<vtkMatrix3x3>::New();
+    for (int i=0;i<3;++i)
+    {
+        for (int j=0;j<3;++j)
+        {
+            vmt->SetElement(i, j, m_imageReader->GetPatientMatrix()->GetElement(i, j));
+        }
+    }
+    m_imageReader->GetOutput()->SetDirectionMatrix(vmt);
+    m_imageReader->GetOutput()->SetOrigin(m_imageReader->GetPatientMatrix()->GetElement(0, 3),
+                                      m_imageReader->GetPatientMatrix()->GetElement(1, 3),
+                                      m_imageReader->GetPatientMatrix()->GetElement(2, 3));
 	return m_imageReader;
 }
 

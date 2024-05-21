@@ -337,7 +337,7 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseUpAction(vtkAbstractW
 	self->ReleaseFocus();
 	self->InvokeEvent(qualityHigh, &self->m_plane);
 	self->InvokeEvent(vtkCommand::LeftButtonReleaseEvent, nullptr);
-        self->InvokeEvent(cursorFinishMovement, &self->m_plane);
+	self->InvokeEvent(cursorFinishMovement, &self->m_plane);
 	self->EventCallbackCommand->SetAbortFlag(1);
 	self->Render();
 }

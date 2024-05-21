@@ -7,7 +7,8 @@
 #include <vtkContourValues.h>
 #include <QString>
 #include <vtkImageFlip.h>
-
+#include <vtkRendererCollection.h>
+#include <vtkCamera.h>
 void asclepios::gui::vtkWidget3D::initWidget()
 {
 	m_renderWindows[0] = vtkSmartPointer<vtkRenderWindow>::New();
@@ -98,30 +99,29 @@ void asclepios::gui::vtkWidget3D::setFilter(const QString& t_filePath)
     //-----------------------------------------------------------------------------
 void asclepios::gui::vtkWidget3D::render()
 {
-	m_renderWindows[0]->OffScreenRenderingOn();
-	setVolumeMapperBlend();
-	const auto [window, level] = getWindowLevel();
-	const auto reader = m_image && m_image->getIsMultiFrame()
-		                    ? m_image->getImageReader()
-		                    : m_series->getReaderForAllSingleFrameImages();
-        reader->SetMemoryRowOrderToFileNative();
-        /*vtkNew<vtkImageFlip> flipy;
-        flipy->SetInputConnection(reader->GetOutputPort());
-        flipy->SetFilteredAxis(1);
-        vtkNew<vtkImageFlip> flipz;
-        flipz->SetInputConnection(flipy->GetOutputPort());
-        flipz->SetFilteredAxis(2);*/
-        m_mapper->SetInputConnection(reader->GetOutputPort());
-	m_transferFunction->updateWindowLevel(window, level);
-	m_volume->SetMapper(m_mapper);
-	m_renderer->AddActor(m_volume);
-	m_renderWindows[0]->AddRenderer(m_renderer);
-	m_renderWindows[0]->Render();
-	m_renderWindows[0]->OffScreenRenderingOff();
-	auto* const extend = m_volume->GetBounds();
-	m_volume->SetOrigin(extend[0] + (extend[1] - extend[0]) / 2,
-	                    extend[2] + (extend[3] - extend[2]) / 2, 0);
-	initInteractorStyle();
+    m_renderWindows[0]->OffScreenRenderingOn();
+    setVolumeMapperBlend();
+    const auto [window, level] = getWindowLevel();
+    const auto reader = m_image && m_image->getIsMultiFrame() ? m_image->getImageReader()
+                                                              : m_series->getReaderForAllSingleFrameImages();
+    // reader->SetMemoryRowOrderToFileNative();
+    /*vtkNew<vtkImageFlip> flipy;
+    flipy->SetInputConnection(reader->GetOutputPort());
+    flipy->SetFilteredAxis(1);
+    vtkNew<vtkImageFlip> flipz;
+    flipz->SetInputConnection(flipy->GetOutputPort());
+    flipz->SetFilteredAxis(2);*/
+    m_mapper->SetInputData(reader->GetOutput());
+    m_transferFunction->updateWindowLevel(window, level);
+    m_volume->SetMapper(m_mapper);
+    m_renderer->AddActor(m_volume);
+    m_renderWindows[0]->AddRenderer(m_renderer);
+    m_renderWindows[0]->Render();
+    m_renderWindows[0]->OffScreenRenderingOn();
+    auto* const extend = m_volume->GetBounds();
+    m_volume->SetOrigin(extend[0] + (extend[1] - extend[0]) / 2,
+	                extend[2] + (extend[3] - extend[2]) / 2, 0);
+    initInteractorStyle();
 }
 
 //-----------------------------------------------------------------------------

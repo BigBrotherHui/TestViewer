@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LatticeWidget</class>
+ <widget class="QWidget" name="LatticeWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Widget</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="LatticeResliceWidget" name="widget_front" native="true"/>
+   </item>
+   <item>
+    <widget class="LatticeResliceWidget" name="widget_mid" native="true"/>
+   </item>
+   <item>
+    <widget class="LatticeResliceWidget" name="widget_back" native="true"/>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LatticeResliceWidget</class>
+   <extends>QWidget</extends>
+   <header>LatticeResliceWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

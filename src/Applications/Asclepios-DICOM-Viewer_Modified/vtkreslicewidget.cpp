@@ -120,6 +120,13 @@ void asclepios::gui::vtkResliceWidget::refreshWindows(const int t_windowNumber)
 		}
 		m_windows[i]->Render();
 	}
+        std::array<std::array<double, 3>, 3> position;
+        for (int i = 0; i < 3; ++i) {
+            position[i][0] = m_cursorWidget[i]->getCursorCenterPosition()[0];
+            position[i][1] = m_cursorWidget[i]->getCursorCenterPosition()[1];
+            position[i][2] = m_cursorWidget[i]->getCursorCenterPosition()[2];
+        }
+	InvokeEvent(cursorFinishMovement,&position);
 }
 
 /*------------------------------------------------------------------------------------*/

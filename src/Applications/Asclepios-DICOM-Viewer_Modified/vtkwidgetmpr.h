@@ -6,7 +6,7 @@
 #include "vtkwidgetoverlay.h"
 #include "vtkreslicewidget.h"
 #include "vtkwidgetmprcallback.h"
-
+class LatticeWidget;
 namespace asclepios::gui
 {
 	class vtkWidgetMPR final : public vtkWidgetBase
@@ -38,7 +38,7 @@ namespace asclepios::gui
 		std::unique_ptr<MPRMaker> m_mprMaker = {};
 		std::unique_ptr<vtkWidgetOverlay> m_widgetOverlay[3] = {};
 		unsigned int m_callbackTags[3] = {};
-
+                LatticeWidget* m_latticewidget{nullptr};
 		void initializeWidget();
 		void createResliceWidget();
 		void createVTKkWidgetOverlay(vtkRenderWindow* t_window, int& t_windowNumber);
