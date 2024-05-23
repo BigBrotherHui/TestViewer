@@ -38,7 +38,6 @@ void LatticeWidget::centerImageActors(std::array<std::array<double, 3>, 3> posit
     vtkSmartPointer<vtkMatrix4x4> matrixfront = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkSmartPointer<vtkMatrix4x4> matrixback = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkMatrix4x4* vmt = reslicer->GetResliceAxes();
-    vmt->Print(std::cout);
     matrixfront->DeepCopy(vmt);
     matrixback->DeepCopy(vmt);
     const double sliceSpacing = 1;

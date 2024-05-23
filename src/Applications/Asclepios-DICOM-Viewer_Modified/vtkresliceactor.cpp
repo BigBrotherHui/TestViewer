@@ -118,15 +118,20 @@ vtkSmartPointer<vtkActor> createTextActor(const std::string &text,double *positi
 void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double y, double z,int value)
 {
     double* ori{nullptr};
-    if (textActor)
-        ori = textActor->GetOrientation();
-    textActor = vtkSmartPointer<vtkAssembly>::New();
-    if (ori)
-        textActor->RotateZ(ori[2]);
+    double* pos{nullptr};
+    if (m_actorText) {
+        ori = m_actorText->GetOrientation();
+        pos = m_actorText->GetPosition();
+    }
+    m_actorText = vtkSmartPointer<vtkAssembly>::New();
+    if (ori) {
+        m_actorText->RotateZ(ori[2]);
+        m_actorText->SetPosition(pos);
+    }
     vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
     vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
     lines->InsertNextCell(2);
-    double center[3]{0, 0, 0};
+    double center[3]{0,0, 0};
     double centerLeft[3]{0, 0, 0}, centerRight[3]{0, 0, 0};
     for (int i = 0; i < 2; ++i) {
         centerLeft[i] = center[i];
@@ -155,7 +160,7 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
 
         if (i % 2) {
             double pos[3]{10, -i * m_wallSpacing * actorScale - actorScale / 2, 0};
-            textActor->AddPart(createTextActor(std::to_string(i), pos, actorScale));
+            m_actorText->AddPart(createTextActor(std::to_string(i), pos, actorScale));
         }
     }
     append1->Update();
@@ -175,8 +180,9 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
         append2->AddInputData(expandedSpline);
 
         if (i % 2) {
-            double pos[3]{10, i * m_wallSpacing*actorScale - actorScale / 2, 0};
-            textActor->AddPart(createTextActor(std::to_string(i), pos, actorScale));
+            double* p = m_actorTranslate->GetPosition();
+            double pos[3]{10, i * m_wallSpacing * actorScale - actorScale / 2,0};
+            m_actorText->AddPart(createTextActor(std::to_string(i), pos, actorScale));
         }
     }
     append2->Update();
@@ -261,8 +267,8 @@ void asclepios::gui::vtkResliceActor::reset() const
     m_actorTranslate->SetPosition(0, 0, 0);
     m_actorRotate->RotateZ(-orientation[2]);
     m_actorRotate->SetPosition(0, 0, 0);
-    textActor->RotateZ(-orientation[2]);
-    textActor->SetPosition(0, 0, 0);
+    m_actorText->RotateZ(-orientation[2]);
+    m_actorText->SetPosition(0, 0, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -451,6 +457,7 @@ void asclepios::gui::vtkResliceActor::update()
 		    m_centerPointDisplayPosition[1],
 		    0.01);
         m_actorRotate->SetPosition(m_centerPointDisplayPosition[0], m_centerPointDisplayPosition[1], 0.01);
+        m_actorText->SetPosition(m_centerPointDisplayPosition[0], m_centerPointDisplayPosition[1], 0.01);
     }
 }
 

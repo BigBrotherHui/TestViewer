@@ -206,13 +206,13 @@ void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double 
         calculateTranslateX(x, y, m_rotationAngle);
         m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
         m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
-		m_cursorActor->getActorText()->AddPosition(x, y, 0);
+	m_cursorActor->getActorText()->AddPosition(x, y, 0);
     }   
     else {
         calculateTranslateY(x, y, m_rotationAngle);
         m_cursorActor->getActorTranslate()->AddPosition(x, y, 0);
         m_cursorActor->getActorRotate()->AddPosition(x, y, 0);
-		m_cursorActor->getActorText()->AddPosition(x, y, 0);
+	m_cursorActor->getActorText()->AddPosition(x, y, 0);
     }
 }
 
