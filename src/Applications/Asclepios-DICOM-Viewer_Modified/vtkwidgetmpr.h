@@ -31,7 +31,6 @@ namespace asclepios::gui
 		void changeWindowLevel(vtkRenderWindow* t_renderWindow, const int& t_window,
 			const int& t_level, bool t_append = true);
 		void create3DMatrix() const;
-
 	private:
 		vtkSmartPointer<vtkWidgetMPRCallback> m_callback = {};
 		vtkSmartPointer<vtkResliceWidget> m_resliceWidget = {};

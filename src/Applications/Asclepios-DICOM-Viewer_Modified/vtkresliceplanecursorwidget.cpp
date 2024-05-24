@@ -232,10 +232,20 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseDownAction(vtkAbstrac
                                 if (value == 0 || value == 1) {
 				    self->m_state = translate;
 				}
-				else if(value==11 || value==12){
+				else if(value==11 || value==12){//wall的前后2根线
 				    self->m_state=expand;
 				}
-                                self->m_selectedAxis = value;
+				else if(value==255){//wall的其它线
+					auto renderer =
+						self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+					vtkNew<vtkCoordinate> coordinate;
+					coordinate->SetCoordinateSystemToDisplay();
+					coordinate->SetValue(X, Y);
+					double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
+					double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};
+					self->pickCurrentSlice(cd[0], cd[1], cd[2],value);
+				}
+				self->m_selectedAxis = value;
 			}
 			else if(picker->GetActor() == resliceActor->getActorRotate()){
 				self->m_state = rotate;
@@ -353,9 +363,14 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::translateCursor(double x, doub
     dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep)->translate(x, y,z, moveAxes);
 }
 
-void asclepios::gui::vtkReslicePlaneCursorWidget::expandWall(double x,double y,double z, char moveAxes) const
+void asclepios::gui::vtkReslicePlaneCursorWidget::expandWall(double x, double y, double z, unsigned char moveAxes) const
 {
     dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep)->expand(x,y,z, moveAxes);
+}
+
+void asclepios::gui::vtkReslicePlaneCursorWidget::pickCurrentSlice(double x, double y, double z,unsigned char moveaxes)
+{
+    dynamic_cast<vtkResliceWidgetRepresentation*>(WidgetRep)->pickCurrentSlice(x, y, z,moveaxes);
 }
 
 //-----------------------------------------------------------------------------

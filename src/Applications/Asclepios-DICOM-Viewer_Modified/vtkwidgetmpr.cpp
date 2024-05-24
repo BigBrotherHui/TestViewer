@@ -9,6 +9,7 @@
 #include <vtkDICOMMetaData.h>
 #include <vtkScalarsToColors.h>
 #include "LatticeWidget.h"
+#include "vtkreslicewidgetrepresentation.h"
 
 class Callback : public vtkCommand {
 public:
@@ -19,10 +20,14 @@ public:
     void Execute(vtkObject* caller, unsigned long eventId, void* callData) override
     {
         std::array<std::array<double, 3>, 3> position = *static_cast<std::array<std::array<double, 3>, 3> *>(callData);
+        m_latticewidget->setResliceSpacing(m_resliceActor->getWallSpacing());
+        m_latticewidget->setSlice(m_resliceActor->getImageNumFront(), m_resliceActor->getImageNumBack(),m_resliceActor->getPickedSlice(), m_resliceActor->getActorScale());
         m_latticewidget->centerImageActors(position);
+        std::cout<<m_resliceActor->getPickedSlice()<<std::endl;
         m_latticewidget->Render();
     }
     LatticeWidget* m_latticewidget;
+    vtkSmartPointer<asclepios::gui::vtkResliceActor> m_resliceActor;
 };
 
 asclepios::gui::vtkWidgetMPR::~vtkWidgetMPR()
@@ -205,11 +210,14 @@ void asclepios::gui::vtkWidgetMPR::createResliceWidget()
                                            m_mprMaker->getImageReslice(2));
         m_latticewidget->show();
 	m_resliceWidget->SetInteractor(m_renderWindows[0]->GetInteractor());
-        vtkSmartPointer<Callback> callback=vtkSmartPointer<Callback>::New();
-        callback->m_latticewidget = m_latticewidget;
-        m_resliceWidget->AddObserver(cursorFinishMovement,callback);
 	m_resliceWidget->SetEnabled(1);
 	m_resliceWidget->setVisible(false);
+        vtkSmartPointer<Callback> callback = vtkSmartPointer<Callback>::New();
+        callback->m_latticewidget = m_latticewidget;
+        callback->m_resliceActor = static_cast<vtkResliceWidgetRepresentation*>(
+                                       m_resliceWidget->getReslicePlaneCursorWidget(2)->GetRepresentation())
+                                       ->getResliceActor();
+        m_resliceWidget->AddObserver(cursorFinishMovement, callback);
 }
 
 //-----------------------------------------------------------------------------

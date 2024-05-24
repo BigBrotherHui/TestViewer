@@ -24,11 +24,18 @@ public:
         vtkMatrix4x4* m_thirdResliceMatrix);
     void centerImageActors(std::array<std::array<double, 3>, 3> position);
     void Render();
+    void setResliceSpacing(double slicespacing);
+    void setSlice(int frontSliceNum,int backSliceNum,int pickedSlice,double scale);
 
 protected:
     void centerImageActors();
 
 private:
     Ui::LatticeWidget *ui;
+    double m_sliceSpacing{1};
+    int m_frontSliceNum{10};
+    int m_backSliceNum{10};
+    int m_pickedSlice{0};
+    double m_scale{5};
 };
 #endif // LATTICEWIDGET_H

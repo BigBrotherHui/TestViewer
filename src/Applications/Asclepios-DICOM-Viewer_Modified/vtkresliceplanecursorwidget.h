@@ -51,7 +51,8 @@ namespace asclepios::gui
 		static void leftMouseUpAction(vtkAbstractWidget* w);
 		void rotateCursor(double t_angle) const;
                 void translateCursor(double x, double y,double z, char moveAxes) const;
-                void expandWall(double x, double y, double z, char moveAxes) const;
+                void expandWall(double x, double y, double z, unsigned char moveAxes) const;
+                void pickCurrentSlice(double x, double y, double z, unsigned char moveaxes);
 		friend class vtkReslicePlaneCursorCallback;
                 int m_selectedAxis{-1};
 	};

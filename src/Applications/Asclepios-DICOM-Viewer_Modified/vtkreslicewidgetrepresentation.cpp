@@ -216,7 +216,7 @@ void asclepios::gui::vtkResliceWidgetRepresentation::translate(double x, double 
     }
 }
 
-void asclepios::gui::vtkResliceWidgetRepresentation::expand(double x, double y, double z, char moveAxes)
+void asclepios::gui::vtkResliceWidgetRepresentation::expand(double x, double y, double z, unsigned char moveAxes)
 {
     double diff[3];
     diff[0] = x - getResliceActor()->getCenterPosition()[0];
@@ -227,6 +227,23 @@ void asclepios::gui::vtkResliceWidgetRepresentation::expand(double x, double y, 
     if (diff[1] < 0 && moveAxes==11) return;
     if (diff[1] < 0) distance = -distance;
     getResliceActor()->createWallRepresentation(x, distance, z, moveAxes);
+}
+
+void asclepios::gui::vtkResliceWidgetRepresentation::pickCurrentSlice(double x, double y, double z,
+                                                                      unsigned char moveAxes)
+{
+    double diff[3];
+    diff[0] = x - getResliceActor()->getCenterPosition()[0];
+    diff[1] = y - getResliceActor()->getCenterPosition()[1];
+    diff[2] = z - getResliceActor()->getCenterPosition()[2];
+    calculateTranslateY(diff[0], diff[1], m_rotationAngle);
+    double distance = std::sqrt(diff[0] * diff[0] + diff[1] * diff[1]);
+    distance = distance/getResliceActor()->getActorScale()/getResliceActor()->getWallSpacing();
+    double roundedDistance =
+        std::round(distance / getResliceActor()->getWallSpacing()) * getResliceActor()->getWallSpacing();
+    int slice = (int)roundedDistance;
+    if (diff[1] < 0) slice = -slice;
+    getResliceActor()->createWallRepresentation(x, distance, z, moveAxes,slice);
 }
 
 //-----------------------------------------------------------------------------

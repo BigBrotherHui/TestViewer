@@ -28,7 +28,7 @@ namespace {
 void AssignScalarValueTo(vtkPolyData* polydata, char value)
 {
     if (!polydata) return;
-    vtkSmartPointer<vtkCharArray> pointData = vtkSmartPointer<vtkCharArray>::New();
+    vtkSmartPointer<vtkUnsignedCharArray> pointData = vtkSmartPointer<vtkUnsignedCharArray>::New();
     int numberOfPoints = polydata->GetNumberOfPoints();
     pointData->SetNumberOfComponents(1);
     pointData->SetNumberOfTuples(numberOfPoints);
@@ -115,8 +115,9 @@ vtkSmartPointer<vtkActor> createTextActor(const std::string &text,double *positi
     return textActor;
 }
 }  // namespace
-void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double y, double z,int value)
+void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double y, double z, int value, int pickedSlice)
 {
+    if (pickedSlice == -9999) pickedSlice = m_pickedSlice;
     double* ori{nullptr};
     double* pos{nullptr};
     if (m_actorText) {
@@ -167,8 +168,13 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
     if (append1->GetOutput()) {
         AssignScalarValueTo(append1->GetOutput(), 255);
         if (append1->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() > 2) {
-            for (int i = 0; i < 2; ++i) {
-                append1->GetOutput()->GetPointData()->GetScalars()->SetTuple1(i, 12);
+            int slice = -pickedSlice;
+            for (int i = 0; i < append1->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples(); ++i) {
+                if (i<2)
+                    append1->GetOutput()->GetPointData()->GetScalars()->SetTuple1(i, 12);
+                else if (pickedSlice < 0 && (i == 2 * (m_imageNumFront-slice) || i == 2 * (m_imageNumFront-slice) + 1)) {
+                    append1->GetOutput()->GetPointData()->GetScalars()->SetTuple1(i, 14);
+                }
             }
         }
     }
@@ -189,12 +195,15 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
     if (append2->GetOutput()) {
         AssignScalarValueTo(append2->GetOutput(), 255);
         if (append2->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() > 2) {
-            for (int i = append2->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() - 1, count = 0;
-                 i > 0 && count < 2; --i, ++count) {
+            for (int i = 0; i < append2->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples();++i) {
+                if (i == append2->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() - 2 ||
+                    i == append2->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() - 1)
                 append2->GetOutput()->GetPointData()->GetScalars()->SetTuple1(i, 11);
+                else if (pickedSlice > 0 && (i == 2*(pickedSlice-1) || i == 2*(pickedSlice-1)+1)) {
+                    append2->GetOutput()->GetPointData()->GetScalars()->SetTuple1(i, pickedSliceTupleValue);
+                }
             }
         }
-        
     }
     append = vtkSmartPointer<vtkAppendPolyData>::New();
     if (append1->GetOutput())
@@ -203,23 +212,25 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
         append->AddInputData(append2->GetOutput());
     append->Update();
     polydataWall->DeepCopy(append->GetOutput());
-    double _colorWall[3]{0, 0.3 * 255, 0};
-    double _colorWallEdge[3]{0.6*255, 0, 0};
+    
     vtkSmartPointer<vtkUnsignedCharArray> colorWall = vtkSmartPointer<vtkUnsignedCharArray>::New();
     colorWall->SetName("Colors");
     colorWall->SetNumberOfComponents(3);
     colorWall->SetNumberOfTuples(polydataWall->GetNumberOfPoints());
     auto scalars = polydataWall->GetPointData()->GetScalars();
     for (auto j = 0; j < polydataWall->GetNumberOfPoints(); j++) {
-        if (scalars->GetTuple1(j) == 11 || scalars->GetTuple1(j) == 12)
+        if (scalars->GetTuple1(j) == 11 || scalars->GetTuple1(j) == 12 ||
+            scalars->GetTuple1(j) == pickedSliceTupleValue)
         {
-            colorWall->InsertTuple3(j, _colorWallEdge[0], _colorWallEdge[1], _colorWallEdge[2]);
+            colorWall->InsertTuple3(j, _colorWallSelected[0], _colorWallSelected[1], _colorWallSelected[2]);
         }
         else {
             colorWall->InsertTuple3(j, _colorWall[0], _colorWall[1], _colorWall[2]);
         }
     }
     polydataWall->GetPointData()->AddArray(colorWall);
+    if (pickedSlice != -9999)
+        m_pickedSlice = pickedSlice;
 }
 
 void asclepios::gui::vtkResliceActor::createActor()

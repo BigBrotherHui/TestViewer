@@ -35,7 +35,7 @@ namespace asclepios::gui
 		void update();
 		void reset() const;
 		void createColors(double* t_color1, double* t_color2);
-                void createWallRepresentation(double x,double y,double z,int value=0);
+                void createWallRepresentation(double x,double y,double z,int value=0,int pickedSlice=-9999);
                 double getWallSpacing()
                 { return m_wallSpacing;
                 }
@@ -47,6 +47,9 @@ namespace asclepios::gui
                 }
                 double getActorScale()
                 { return actorScale;
+                }
+                int getPickedSlice()
+                { return m_pickedSlice;
                 }
 	private:
                 vtkSmartPointer<vtkAppendPolyData> m_appenderTranslate = {}, m_appenderRotate = {};
@@ -64,10 +67,15 @@ namespace asclepios::gui
                 vtkSmartPointer<vtkPolyData> arrowLeft1 = vtkSmartPointer<vtkPolyData>::New();
                 vtkSmartPointer<vtkPolyData> arrowLeft2 = vtkSmartPointer<vtkPolyData>::New();
                 vtkSmartPointer<vtkPolyData> polydataWall = vtkSmartPointer<vtkPolyData>::New();
-                double m_wallSpacing{1};
+                double m_wallSpacing{1};//m_wallSpacing=realSpacing/actorSacle
                 int m_imageNumFront{10};
                 int m_imageNumBack{10};
                 double actorScale = 5;
                 vtkSmartPointer<vtkAssembly> m_actorText{nullptr};
+                double _colorWall[3]{0, 0.3 * 255, 0};
+                double _colorWallEdge[3]{0.6 * 255, 0, 0};
+                double _colorWallSelected[3]{0.8 * 255, 0, 0};
+                int pickedSliceTupleValue = 14;
+                int m_pickedSlice=0;
 	};
 }

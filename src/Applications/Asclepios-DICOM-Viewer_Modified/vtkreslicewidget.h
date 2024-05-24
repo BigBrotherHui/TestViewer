@@ -39,7 +39,14 @@ namespace asclepios::gui
 		void CreateDefaultRepresentation() override;
 		void centerImageActors(int t_excludedCursor);
 		void resetResliceCursor();
-
+                vtkSmartPointer<vtkReslicePlaneCursorWidget> getReslicePlaneCursorWidget(int index)
+                { 
+                    if (index>2)
+                    {
+                        return nullptr;
+                    }
+                    return m_cursorWidget[index];
+                }
 		enum widgetState { start = 0, rotate, translate };
 
 	private:

@@ -36,31 +36,38 @@ void LatticeWidget::centerImageActors(std::array<std::array<double, 3>, 3> posit
 {
     auto reslicer = ui->widget_mid->getImageResicer();
     vtkSmartPointer<vtkMatrix4x4> matrixfront = vtkSmartPointer<vtkMatrix4x4>::New();
+    vtkSmartPointer<vtkMatrix4x4> matrixcenter = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkSmartPointer<vtkMatrix4x4> matrixback = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkMatrix4x4* vmt = reslicer->GetResliceAxes();
     matrixfront->DeepCopy(vmt);
+    matrixcenter->DeepCopy(vmt);
     matrixback->DeepCopy(vmt);
-    const double sliceSpacing = 1;
-    const int sliceNum = 50;
+    const double sliceSpacing = m_sliceSpacing;
     double point[4];
     double center[4];
     point[0] = 0;
     point[1] = 0;
-    point[2] = sliceSpacing * sliceNum;
+    point[2] = sliceSpacing * m_frontSliceNum*m_scale;
     point[3] = 1.0;
     matrixfront->MultiplyPoint(point, center);
     matrixfront->SetElement(0, 3, center[0]);
     matrixfront->SetElement(1, 3, center[1]);
     matrixfront->SetElement(2, 3, center[2]);
 
-    point[2] = -sliceSpacing * sliceNum;
+    point[2] = sliceSpacing * m_pickedSlice * m_scale;
+    matrixcenter->MultiplyPoint(point, center);
+    matrixcenter->SetElement(0, 3, center[0]);
+    matrixcenter->SetElement(1, 3, center[1]);
+    matrixcenter->SetElement(2, 3, center[2]);
+
+    point[2] = -sliceSpacing * m_backSliceNum*m_scale;
     matrixback->MultiplyPoint(point, center);
     matrixback->SetElement(0, 3, center[0]);
     matrixback->SetElement(1, 3, center[1]);
     matrixback->SetElement(2, 3, center[2]);
 
     ui->widget_front->setResliceMatrix(matrixfront);
-    ui->widget_mid->setResliceMatrix(vmt);
+    ui->widget_mid->setResliceMatrix(matrixcenter);
     ui->widget_back->setResliceMatrix(matrixback);
 
     //ui->widget_front->centerImageActor(position[0]);
@@ -73,4 +80,17 @@ void LatticeWidget::Render()
     ui->widget_front->renderWindow()->Render();
     ui->widget_mid->renderWindow()->Render();
     ui->widget_back->renderWindow()->Render();
+}
+
+void LatticeWidget::setResliceSpacing(double slicespacing)
+{
+    m_sliceSpacing = slicespacing;
+}
+
+void LatticeWidget::setSlice(int frontSliceNum, int backSliceNum, int pickedSlice,double scale)
+{
+    m_frontSliceNum = frontSliceNum;
+    m_backSliceNum = backSliceNum;
+    m_pickedSlice = pickedSlice;
+    m_scale = scale;
 }
