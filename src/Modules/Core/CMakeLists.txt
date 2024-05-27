@@ -1,5 +1,7 @@
+find_package(MITK REQUIRED)
 create_module(
-  PACKAGE_DEPENDS
+DEPENDS MitkCore MitkQtWidgets
+PACKAGE_DEPENDS
     PRIVATE VTK ITK
 )
 add_definitions(-DITK_IO_FACTORY_REGISTER_MANAGER)
