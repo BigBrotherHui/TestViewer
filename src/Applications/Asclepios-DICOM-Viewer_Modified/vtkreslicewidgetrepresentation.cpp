@@ -19,6 +19,7 @@
 #include "vtkAlgorithm.h"
 #include <vtkRenderWindowInteractor.h>
 #include <vtkInteractorStyleImage.h>
+#include <vtkProperty.h>
 vtkStandardNewMacro(asclepios::gui::vtkResliceWidgetRepresentation);
 
 asclepios::gui::vtkResliceWidgetRepresentation::vtkResliceWidgetRepresentation()
@@ -65,8 +66,11 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 	picker->SetTolerance(0.01);
 	picker->InitializePickList();
 	picker->PickFromListOn();
-	picker->AddPickList(m_cursorActor->getActorTranslate());
-	picker->AddPickList(m_cursorActor->getActorRotate());
+	if(m_cursorActor->getInteractionMode()==0){
+		picker->AddPickList(m_cursorActor->getActorTranslate());
+		picker->AddPickList(m_cursorActor->getActorRotate());
+	}
+	picker->AddPickList(m_cursorActor->getActorLattice());
 	if (picker->Pick(X, Y, 0, Renderer))
 	{
             if (picker->GetActor() == m_cursorActor->getActorTranslate()) {
@@ -76,7 +80,7 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 									    ->GetPointData()
 									    ->GetScalars()
 									    ->GetTuple1(id);
-                if (v == 0 || v == 11 || v==12) {
+                if (v == 0) {
 		        return calculateCursorState(m_rotationAngle * 180 / M_PI);
 	        }
 	        else if (v == 1) {
@@ -86,6 +90,24 @@ int asclepios::gui::vtkResliceWidgetRepresentation::ComputeInteractionState(
 		        return VTK_CURSOR_DEFAULT;
 	        }    
 	    }
+		else if(picker->GetActor()==m_cursorActor->getActorLattice()){
+			auto id=picker->GetPointId();
+		    auto v = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
+									    ->GetInput()
+									    ->GetPointData()
+									    ->GetScalars()
+									    ->GetTuple1(id);
+										if(v == 11 || v==12){
+											return calculateCursorState(m_rotationAngle * 180 / M_PI);
+										}
+										else if(v==m_cursorActor->getPickedSliceTupleValue())
+										{
+											return VTK_CURSOR_HAND;
+										}
+										else {
+		        return VTK_CURSOR_DEFAULT;
+	        }  
+		}
 	    else if (picker->GetActor() == m_cursorActor->getActorRotate()) {
 		    return VTK_CURSOR_HAND;
 	    }
@@ -98,12 +120,12 @@ void asclepios::gui::vtkResliceWidgetRepresentation::instantiateHandleRepresenta
 {
 	if (!m_centerMovementPointRepresentation)
 	{
-		m_centerMovementPointRepresentation = vtkSmartPointer<PointHandleRepresentation3D>::New();
-                m_centerMovementPointRepresentation->SetSmoothMotion(1);
-                m_centerMovementPointRepresentation->SetHandleSize(0);
-                m_centerMovementPointRepresentation->SetTolerance(15);
-                m_centerMovementPointRepresentation->AllOff();
-                m_centerMovementPointRepresentation->TranslationModeOn();
+        m_centerMovementPointRepresentation = vtkSmartPointer<SphereHandleRepresentation>::New();
+		//m_centerMovementPointRepresentation->SetSmoothMotion(1);
+		m_centerMovementPointRepresentation->SetHandleSize(20);
+		m_centerMovementPointRepresentation->SetTolerance(15);
+		//m_centerMovementPointRepresentation->AllOff();
+		m_centerMovementPointRepresentation->TranslationModeOn();
 	}
 }
 
@@ -144,6 +166,8 @@ void asclepios::gui::vtkResliceWidgetRepresentation::ReleaseGraphicsResources(
 	{
         m_cursorActor->getActorTranslate()->ReleaseGraphicsResources(w);
 		m_cursorActor->getActorRotate()->ReleaseGraphicsResources(w);
+		m_cursorActor->getActorLattice()->ReleaseGraphicsResources(w);
+		m_cursorActor->getActorText()->ReleaseGraphicsResources(w);
 	}
 }
 
@@ -154,8 +178,14 @@ int asclepios::gui::vtkResliceWidgetRepresentation::RenderOverlay(
 	int count = 0;
     if (m_cursorActor->getActorTranslate() && m_cursorVisibility)
 	{
-            count += m_cursorActor->getActorTranslate()->RenderOverlay(viewport);
+		if(m_cursorActor->getInteractionMode()==0){
+           count += m_cursorActor->getActorTranslate()->RenderOverlay(viewport);
 			count += m_cursorActor->getActorRotate()->RenderOverlay(viewport);
+		}else{
+count +=m_cursorActor->getActorLattice()->RenderOverlay(viewport);
+			count +=m_cursorActor->getActorText()->RenderOverlay(viewport);
+		}
+			
 	}
 	return count;
 }
@@ -166,10 +196,15 @@ int asclepios::gui::vtkResliceWidgetRepresentation::RenderOpaqueGeometry(
 {
     if (m_cursorActor->getActorTranslate() && m_cursorActor->getActorTranslate()->GetVisibility() &&
 		m_cursorVisibility)
-	{
-            m_cursorActor->getActorTranslate()->RenderOpaqueGeometry(viewport);
+	{		
+		if(m_cursorActor->getInteractionMode()==0){
+			m_cursorActor->getActorTranslate()->RenderOpaqueGeometry(viewport);
 			m_cursorActor->getActorRotate()->RenderOpaqueGeometry(viewport);
+		}else{
 			m_cursorActor->getActorText()->RenderOpaqueGeometry(viewport);
+			m_cursorActor->getActorLattice()->RenderOpaqueGeometry(viewport);
+		}
+		
 	}
 	else
 	{
@@ -193,6 +228,7 @@ void asclepios::gui::vtkResliceWidgetRepresentation::rotate(double t_angle)
     m_rotationAngle += t_angle;
     m_cursorActor->getActorRotate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
     m_cursorActor->getActorTranslate()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
+	m_cursorActor->getActorLattice()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
 	m_cursorActor->getActorText()->RotateZ(vtkMath::DegreesFromRadians(t_angle));
 }
 

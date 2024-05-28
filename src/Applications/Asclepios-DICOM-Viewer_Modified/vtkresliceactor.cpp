@@ -117,7 +117,6 @@ vtkSmartPointer<vtkActor> createTextActor(const std::string &text,double *positi
 }  // namespace
 void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double y, double z, int value, int pickedSlice)
 {
-    if (pickedSlice == -9999) pickedSlice = m_pickedSlice;
     double* ori{nullptr};
     double* pos{nullptr};
     if (m_actorText) {
@@ -159,7 +158,7 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
         auto expandedSpline = ExpandSpline(p, p->GetNumberOfPoints() - 1, stepSize);
         append1->AddInputData(expandedSpline);
 
-        if (i % 2) {
+        if (i != 0 && i % 5 == 0) {
             double pos[3]{10, -i * m_wallSpacing * actorScale - actorScale / 2, 0};
             m_actorText->AddPart(createTextActor(std::to_string(i), pos, actorScale));
         }
@@ -185,7 +184,7 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
         auto expandedSpline = ExpandSpline(p, p->GetNumberOfPoints() - 1, stepSize);
         append2->AddInputData(expandedSpline);
 
-        if (i % 2) {
+        if (i!=0 && i%5 == 0) {
             double* p = m_actorTranslate->GetPosition();
             double pos[3]{10, i * m_wallSpacing * actorScale - actorScale / 2,0};
             m_actorText->AddPart(createTextActor(std::to_string(i), pos, actorScale));
@@ -205,11 +204,17 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
             }
         }
     }
+    auto expandedSplineMid = ExpandSpline(p, p->GetNumberOfPoints() - 1, 0);
+    if (pickedSlice == 0)
+        AssignScalarValueTo(expandedSplineMid, pickedSliceTupleValue);
+    else
+        AssignScalarValueTo(expandedSplineMid, 13);
     append = vtkSmartPointer<vtkAppendPolyData>::New();
     if (append1->GetOutput())
         append->AddInputData(append1->GetOutput());
     if (append2->GetOutput())
         append->AddInputData(append2->GetOutput());
+    append->AddInputData(expandedSplineMid);
     append->Update();
     polydataWall->DeepCopy(append->GetOutput());
     
@@ -229,8 +234,7 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
         }
     }
     polydataWall->GetPointData()->AddArray(colorWall);
-    if (pickedSlice != -9999)
-        m_pickedSlice = pickedSlice;
+    m_pickedSlice = pickedSlice;
 }
 
 void asclepios::gui::vtkResliceActor::createActor()
@@ -268,6 +272,15 @@ void asclepios::gui::vtkResliceActor::createActor()
         m_actorRotate = vtkSmartPointer<vtkActor>::New();
         m_actorRotate->SetMapper(m_mapper2);
         m_actorRotate->GetProperty()->SetInterpolationToGouraud();
+
+        vtkSmartPointer<vtkPolyDataMapper> m_mapper3 = vtkSmartPointer<vtkPolyDataMapper>::New();
+        m_mapper3->SetInputData(polydataWall);
+        m_mapper3->ScalarVisibilityOn();
+        m_mapper3->SetScalarModeToUsePointFieldData();
+        m_mapper3->SelectColorArray("Colors");
+        m_actorLattice = vtkSmartPointer<vtkActor>::New();
+        m_actorLattice->SetMapper(m_mapper3);
+        m_actorLattice->GetProperty()->SetInterpolationToGouraud();
 }
 
 //-----------------------------------------------------------------------------
@@ -278,6 +291,8 @@ void asclepios::gui::vtkResliceActor::reset() const
     m_actorTranslate->SetPosition(0, 0, 0);
     m_actorRotate->RotateZ(-orientation[2]);
     m_actorRotate->SetPosition(0, 0, 0);
+    m_actorLattice->RotateZ(-orientation[2]);
+    m_actorLattice->SetPosition(0, 0, 0);
     m_actorText->RotateZ(-orientation[2]);
     m_actorText->SetPosition(0, 0, 0);
 }
@@ -437,8 +452,6 @@ void asclepios::gui::vtkResliceActor::update()
         arrowLeft2->GetPointData()->AddArray(m_colors[0]);
 
         createWallRepresentation(m_wallSpacing, m_imageNumFront, m_imageNumBack);
-        m_appenderTranslate->AddInputData(polydataWall);
-
 
         m_cursorLines2[1]->SetPoint1(m_centerPointDisplayPosition[0],
                                      m_centerPointDisplayPosition[0] - m_windowSize[1] / factor * 2000,
@@ -458,7 +471,7 @@ void asclepios::gui::vtkResliceActor::update()
 
         m_actorTranslate->SetScale(actorScale);
         m_actorRotate->SetScale(actorScale);
-
+        m_actorLattice->SetScale(actorScale);
         m_start = 1;
     }
     else
@@ -468,6 +481,7 @@ void asclepios::gui::vtkResliceActor::update()
 		    m_centerPointDisplayPosition[1],
 		    0.01);
         m_actorRotate->SetPosition(m_centerPointDisplayPosition[0], m_centerPointDisplayPosition[1], 0.01);
+        m_actorLattice->SetPosition(m_centerPointDisplayPosition[0], m_centerPointDisplayPosition[1], 0.01);
         m_actorText->SetPosition(m_centerPointDisplayPosition[0], m_centerPointDisplayPosition[1], 0.01);
     }
 }

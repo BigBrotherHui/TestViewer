@@ -23,7 +23,6 @@ public:
         m_latticewidget->setResliceSpacing(m_resliceActor->getWallSpacing());
         m_latticewidget->setSlice(m_resliceActor->getImageNumFront(), m_resliceActor->getImageNumBack(),m_resliceActor->getPickedSlice(), m_resliceActor->getActorScale());
         m_latticewidget->centerImageActors(position);
-        std::cout<<m_resliceActor->getPickedSlice()<<std::endl;
         m_latticewidget->Render();
     }
     LatticeWidget* m_latticewidget;

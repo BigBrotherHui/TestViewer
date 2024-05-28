@@ -214,8 +214,11 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseDownAction(vtkAbstrac
 		rep->getResliceActor();
 	if (resliceActor && rep->GetVisibility())
 	{
+            if (resliceActor->getInteractionMode() == 0) {
             picker->AddPickList(resliceActor->getActorTranslate());
 			picker->AddPickList(resliceActor->getActorRotate());
+		}
+		picker->AddPickList(resliceActor->getActorLattice());
 	}
 	if (picker->Pick(X, Y, 0, self->GetCurrentRenderer()))
 	{
@@ -229,11 +232,30 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseDownAction(vtkAbstrac
 											->GetPointData()
 											->GetScalars()
 											->GetTuple1(id);
-                                if (value == 0 || value == 1) {
+                                if (value == 0 || value == 1 ) {
 				    self->m_state = translate;
 				}
+				self->m_selectedAxis = value;
+			}
+			else if(picker->GetActor() == resliceActor->getActorRotate()){
+				self->m_state = rotate;
+			}
+                        else if (picker->GetActor() == resliceActor->getActorLattice()) {
+                            auto id = picker->GetPointId();
+                            int value = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
+                                            ->GetInput()
+                                            ->GetPointData()
+                                            ->GetScalars()
+                                            ->GetTuple1(id);
+                            if (self->WidgetRep->ComputeInteractionState(X, Y) == VTK_CURSOR_SIZEALL)
+                            {
+                                self->m_state = translate;
+                            }
 				else if(value==11 || value==12){//wall的前后2根线
 				    self->m_state=expand;
+				}
+				else if(value==resliceActor->getPickedSliceTupleValue()){
+					self->m_state=rotate;
 				}
 				else if(value==255){//wall的其它线
 					auto renderer =
@@ -246,9 +268,6 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseDownAction(vtkAbstrac
 					self->pickCurrentSlice(cd[0], cd[1], cd[2],value);
 				}
 				self->m_selectedAxis = value;
-			}
-			else if(picker->GetActor() == resliceActor->getActorRotate()){
-				self->m_state = rotate;
 			}
 		}
 		self->InvokeEvent(qualityLow, &self->m_plane);

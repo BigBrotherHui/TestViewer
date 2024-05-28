@@ -21,6 +21,7 @@ namespace asclepios::gui
 		//getters
                 [[nodiscard]] vtkActor* getActorTranslate() const { return m_actorTranslate; }
                 [[nodiscard]] vtkActor* getActorRotate() const { return m_actorRotate; }
+                [[nodiscard]] vtkActor* getActorLattice() const { return m_actorLattice; }
                 vtkAssembly* getActorText() const { return m_actorText; }
                 vtkSmartPointer<vtkAppendPolyData> append;
 		[[nodiscard]] vtkMTimeType getLineTime() const { return m_cursorLines[0]->GetMTime(); }
@@ -35,7 +36,7 @@ namespace asclepios::gui
 		void update();
 		void reset() const;
 		void createColors(double* t_color1, double* t_color2);
-                void createWallRepresentation(double x,double y,double z,int value=0,int pickedSlice=-9999);
+                void createWallRepresentation(double x,double y,double z,int value=0,int pickedSlice=0);
                 double getWallSpacing()
                 { return m_wallSpacing;
                 }
@@ -51,9 +52,11 @@ namespace asclepios::gui
                 int getPickedSlice()
                 { return m_pickedSlice;
                 }
+                int getInteractionMode() { return m_interactionMode; }
+                int getPickedSliceTupleValue() { return pickedSliceTupleValue;}
 	private:
                 vtkSmartPointer<vtkAppendPolyData> m_appenderTranslate = {}, m_appenderRotate = {};
-                vtkSmartPointer<vtkActor> m_actorRotate = {}, m_actorTranslate = {};
+            vtkSmartPointer<vtkActor> m_actorRotate = {}, m_actorTranslate = {}, m_actorLattice={};
 		vtkSmartPointer<vtkTransformFilter> m_filter = {};
                 vtkSmartPointer<vtkLineSource> m_cursorLines[2] = {}, m_cursorLines2[4];
 		vtkSmartPointer<vtkUnsignedCharArray> m_colors[3] = {};
@@ -77,5 +80,7 @@ namespace asclepios::gui
                 double _colorWallSelected[3]{0.8 * 255, 0, 0};
                 int pickedSliceTupleValue = 14;
                 int m_pickedSlice=0;
+                int m_interactionMode{1};  // by default 0 is normal mode, 1 is lattice reslice mode
+
 	};
 }

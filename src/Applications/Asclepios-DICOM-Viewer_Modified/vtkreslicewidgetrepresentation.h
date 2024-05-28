@@ -4,6 +4,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkWidgetRepresentation.h>
 #include "vtkresliceactor.h"
+#include "SphereHandleRepresentation.h"
 
 namespace asclepios::gui
 {
@@ -42,13 +43,13 @@ namespace asclepios::gui
 		int ComputeInteractionState(int X, int Y, int modify) override;
 
 		[[nodiscard]] vtkSmartPointer<vtkResliceActor> getResliceActor() const { return m_cursorActor; }
-		[[nodiscard]] vtkSmartPointer<PointHandleRepresentation3D> getCenterMovementRepresentation() const {
+                [[nodiscard]] vtkSmartPointer<SphereHandleRepresentation> getCenterMovementRepresentation() const
+                {
 			return m_centerMovementPointRepresentation;
 		}
 		enum InteractionState { outside = 0, translateCursorHor,translateCursorVer,rotateCursor, mipCursor, handleCursor };
-
 	private:
-                vtkSmartPointer<PointHandleRepresentation3D> m_centerMovementPointRepresentation = {};
+                vtkSmartPointer<SphereHandleRepresentation> m_centerMovementPointRepresentation = {};
 		vtkSmartPointer<vtkResliceActor> m_cursorActor;
 		bool m_cursorVisibility = false;
 		double m_rotationAngle = 0;
