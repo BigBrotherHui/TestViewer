@@ -45,364 +45,421 @@
 }</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
-   <property name="spacing">
-    <number>6</number>
-   </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>30</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
    <item>
-    <widget class="QWidget" name="widgetFunctions" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>40</width>
-       <height>0</height>
-      </size>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <property name="maximumSize">
-      <size>
-       <width>40</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <property name="leftMargin">
-       <number>0</number>
+     <widget class="QWidget" name="widgetFunctions" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>40</width>
+        <height>0</height>
+       </size>
       </property>
-      <property name="topMargin">
-       <number>0</number>
+      <property name="maximumSize">
+       <size>
+        <width>40</width>
+        <height>16777215</height>
+       </size>
       </property>
-      <property name="rightMargin">
-       <number>0</number>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <property name="horizontalSpacing">
+        <number>0</number>
+       </property>
+       <property name="verticalSpacing">
+        <number>6</number>
+       </property>
+       <item row="7" column="0">
+        <widget class="QPushButton" name="buttonRotateLeft">
+         <property name="minimumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Rotate right</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="gui.qrc">
+           <normaloff>:/res/rotateleft_icon.png</normaloff>:/res/rotateleft_icon.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>26</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="buttonMPR">
+         <property name="minimumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>MPR</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="gui.qrc">
+           <normaloff>:/res/mpr_icon.png</normaloff>:/res/mpr_icon.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>26</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QPushButton" name="buttonInvert">
+         <property name="minimumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Invert</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="gui.qrc">
+           <normaloff>:/res/invert_icon.png</normaloff>:/res/invert_icon.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>26</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="buttonCloseAll">
+         <property name="minimumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Close all patients</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="gui.qrc">
+           <normaloff>:/res/closeAll_icon.png</normaloff>:/res/closeAll_icon.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>26</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="buttonVolume">
+         <property name="minimumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Volume</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="gui.qrc">
+           <normaloff>:/res/3d_icon.png</normaloff>:/res/3d_icon.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>26</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QPushButton" name="buttonFlipHorizontal">
+         <property name="toolTip">
+          <string>Flip horizontal</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="gui.qrc">
+           <normaloff>:/res/fliphorizontal_icon.png</normaloff>:/res/fliphorizontal_icon.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>26</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QPushButton" name="buttonRotateRight">
+         <property name="minimumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Rotate right</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="gui.qrc">
+           <normaloff>:/res/rotateright_icon.png</normaloff>:/res/rotateright_icon.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>26</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QPushButton" name="buttonFlipVerical">
+         <property name="minimumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>36</width>
+           <height>36</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Flip vertical</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="gui.qrc">
+           <normaloff>:/res/flipvertical_icon.png</normaloff>:/res/flipvertical_icon.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>26</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="widget" native="true">
+      <property name="maximumSize">
+       <size>
+        <width>200</width>
+        <height>16777215</height>
+       </size>
       </property>
-      <property name="bottomMargin">
-       <number>0</number>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>切片参数</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>间隔：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEdit_spacing"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>层厚：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEdit_thickness"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>层数：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lineEdit_slicecount"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="buttonSave">
+         <property name="text">
+          <string>保存</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>536</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="">
+      <layout class="QGridLayout" name="gridLayout"/>
+     </widget>
+     <widget class="QWidget" name="widgetPatients" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>235</width>
+        <height>0</height>
+       </size>
       </property>
-      <property name="horizontalSpacing">
-       <number>0</number>
+      <property name="maximumSize">
+       <size>
+        <width>235</width>
+        <height>16777215</height>
+       </size>
       </property>
-      <property name="verticalSpacing">
-       <number>6</number>
+      <property name="styleSheet">
+       <string notr="true"/>
       </property>
-      <item row="7" column="0">
-       <widget class="QPushButton" name="buttonRotateLeft">
-        <property name="minimumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Rotate right</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="gui.qrc">
-          <normaloff>:/res/rotateleft_icon.png</normaloff>:/res/rotateleft_icon.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="3" column="0">
-       <widget class="QPushButton" name="buttonMPR">
-        <property name="minimumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>MPR</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="gui.qrc">
-          <normaloff>:/res/mpr_icon.png</normaloff>:/res/mpr_icon.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QPushButton" name="buttonInvert">
-        <property name="minimumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Invert</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="gui.qrc">
-          <normaloff>:/res/invert_icon.png</normaloff>:/res/invert_icon.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="buttonCloseAll">
-        <property name="minimumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Close all patients</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="gui.qrc">
-          <normaloff>:/res/closeAll_icon.png</normaloff>:/res/closeAll_icon.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QPushButton" name="buttonVolume">
-        <property name="minimumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Volume</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="gui.qrc">
-          <normaloff>:/res/3d_icon.png</normaloff>:/res/3d_icon.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QPushButton" name="buttonFlipHorizontal">
-        <property name="toolTip">
-         <string>Flip horizontal</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="gui.qrc">
-          <normaloff>:/res/fliphorizontal_icon.png</normaloff>:/res/fliphorizontal_icon.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QPushButton" name="buttonRotateRight">
-        <property name="minimumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Rotate right</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="gui.qrc">
-          <normaloff>:/res/rotateright_icon.png</normaloff>:/res/rotateright_icon.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QPushButton" name="buttonFlipVerical">
-        <property name="minimumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Flip vertical</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="gui.qrc">
-          <normaloff>:/res/flipvertical_icon.png</normaloff>:/res/flipvertical_icon.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout"/>
-   </item>
-   <item>
-    <widget class="QWidget" name="widgetPatients" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>235</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>235</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <property name="spacing">
-       <number>0</number>
-      </property>
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>13</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-     </layout>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>13</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -419,8 +476,8 @@
    <slot>onApplyTransformation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>32</x>
-     <y>412</y>
+     <x>45</x>
+     <y>376</y>
     </hint>
     <hint type="destinationlabel">
      <x>-177</x>
@@ -435,8 +492,8 @@
    <slot>onApplyTransformation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>33</x>
-     <y>444</y>
+     <x>46</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>-367</x>
@@ -451,8 +508,8 @@
    <slot>onApplyTransformation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>29</x>
-     <y>486</y>
+     <x>42</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>-226</x>
@@ -467,8 +524,8 @@
    <slot>onApplyTransformation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>21</x>
-     <y>515</y>
+     <x>34</x>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>-276</x>
@@ -483,8 +540,8 @@
    <slot>onApplyTransformation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>37</x>
-     <y>570</y>
+     <x>48</x>
+     <y>534</y>
     </hint>
     <hint type="destinationlabel">
      <x>-432</x>

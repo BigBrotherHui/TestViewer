@@ -1,6 +1,6 @@
 #include "gui.h"
 #include <QFileDialog>
-
+#include "globalsignal.h"
 asclepios::gui::GUI::GUI(QWidget* parent) : QMainWindow(parent)
 {
 	initView();
@@ -103,6 +103,8 @@ void asclepios::gui::GUI::connectFunctions() const
 	Q_UNUSED(connect(widgetsContainer,
 		&WidgetsContainer::createWidgetMPR,
 		this, &GUI::onCreateWidgetMPR));
+        Q_UNUSED(connect(widgetsContainer, &WidgetsContainer::sliceParams, &GlobalSignal::instance(),
+                         &GlobalSignal::slot_sliceParamsChanged));
 }
 
 //-----------------------------------------------------------------------------
