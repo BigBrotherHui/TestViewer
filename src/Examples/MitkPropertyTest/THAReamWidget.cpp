@@ -335,21 +335,10 @@ void THAReamWidget::runReam()
                         *pAll = 0;
                     }
                     else {
-                        if(dis < (radius * radius))
+                        if(dis < radius * radius)
                             continue;
-                        if (i != 0 && i < m_impl->m_extent[1] - 1 && j != 0 && j < m_impl->m_extent[3] - 1 && k != 0 &&
-                            k < m_impl->m_extent[5] - 1) {
-                            for (int u = i - 1; u <= i + 1; ++u) {
-                                for (int v = j - 1; v <= j + 1; ++v) {
-                                    for (int w = k - 1; w <= k + 1; ++w) {
-                                        uchar *pixel = (uchar *)resultImageData->GetScalarPointer(u, v, w);
-                                        if (*pixel == 1 &&
-                                            _dis < (radius - m_impl->m_spacing[0]) * (radius - m_impl->m_spacing[0])) {
-                                            *pixel = 3;
-                                        }
-                                    }
-                                }
-                            }
+                        if (*pAll == 1 && _dis < radius * radius) {
+                            *pAll = 3;
                         }
                     }
                 }
