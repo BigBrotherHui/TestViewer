@@ -7,7 +7,7 @@ find_package(MITK REQUIRED)
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5 REQUIRED Core Widgets)
+find_package(Qt5 REQUIRED Core Widgets Concurrent)
 # Use the compile definitions defined in the Qt 5 Widgets module
 tidyFolder()
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
@@ -32,4 +32,4 @@ if (CMAKE_GENERATOR MATCHES "Visual Studio")
 endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER ${target_directory})
 # Use the Widgets module from Qt 5.
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets ${VTK_LIBRARIES} Core)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Concurrent ${VTK_LIBRARIES} Core MitkCore)

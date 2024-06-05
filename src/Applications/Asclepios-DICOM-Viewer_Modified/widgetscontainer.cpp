@@ -9,7 +9,11 @@ asclepios::gui::WidgetsContainer::WidgetsContainer(QWidget* t_parent)
         m_ui.lineEdit_slicecount->setValidator(new QIntValidator(this));
         m_ui.lineEdit_spacing->setValidator(new QDoubleValidator(this));
         m_ui.lineEdit_thickness->setValidator(new QIntValidator(this));
-        connect(m_ui.buttonSave, &QPushButton::clicked, this, [&] { int slicecount = m_ui.lineEdit_slicecount->text().toInt();
+        connect(m_ui.buttonSave, &QPushButton::clicked, this, [&] { 
+			if (m_ui.lineEdit_spacing->text().isEmpty() || m_ui.lineEdit_slicecount->text().isEmpty() ||
+                m_ui.lineEdit_thickness->text().isEmpty())
+                return;
+            int slicecount = m_ui.lineEdit_slicecount->text().toInt();
             int thickness = m_ui.lineEdit_thickness->text().toInt();
             double spacing = m_ui.lineEdit_spacing->text().toDouble();
             emit sliceParams(slicecount, thickness, spacing);

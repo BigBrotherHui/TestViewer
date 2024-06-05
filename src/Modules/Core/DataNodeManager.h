@@ -8,8 +8,8 @@
 #include <vtkImageData.h>
 #include <vtkMatrix4x4.h>
 #include <vtkPolyData.h>
-
-class DataNodeManager {
+#include "CoreExports.h"
+class Core_EXPORT DataNodeManager {
 public:
     struct Error {
         Error(std::string errormsg) { errorMsg = errormsg; }
@@ -64,6 +64,9 @@ public:
     static mitk::Image *castToImage(mitk::BaseData::Pointer data);
     static mitk::PointSet *castToPoint(mitk::BaseData::Pointer data);
     static mitk::PointSet *castToLine(mitk::BaseData::Pointer data);
+
+        static void coverSurface(mitk::DataNode::Pointer node, vtkPolyData *vp);
+    static void coverImage(mitk::DataNode::Pointer node, vtkImageData *vimg);
 
     static void EigenToVtkMatrix4x4(Eigen::Matrix4d mt, vtkMatrix4x4 *vmt);
     static void VtkMatrix4x4ToEigen(Eigen::Matrix4d &mt, vtkMatrix4x4 *vmt);

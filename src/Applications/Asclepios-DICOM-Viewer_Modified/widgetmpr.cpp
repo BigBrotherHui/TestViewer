@@ -4,6 +4,8 @@
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <QtConcurrent/qtconcurrentrun.h>
 #include "tabwidget.h"
+#include "globalsignal.h"
+#include "vtkreslicewidgetrepresentation.h"
 
 asclepios::gui::WidgetMPR::WidgetMPR(QWidget* parent)
 	: WidgetBase(parent)
@@ -12,6 +14,17 @@ asclepios::gui::WidgetMPR::WidgetMPR(QWidget* parent)
 	initView();
 	createConnections();
 	m_tabWidget = parent;
+        connect(&GlobalSignal::instance(), &GlobalSignal::signal_sliceParamsChanged, this,
+                [&](int slicecount, int thickness, double spacing) {
+                    auto rep=dynamic_cast<vtkResliceWidgetRepresentation*>(
+                        m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(0)->GetRepresentation());
+                    auto actor=rep->getResliceActor();
+                    actor->setImageNumFront(slicecount / 2);
+                    actor->setImageNumBack(slicecount / 2);
+                    actor->setWallSpacing(spacing);
+                    actor->createWallRepresentation(0, 0, 0,0,actor->getPickedSlice());
+                    m_widgetMPR->getResliceWidget()->Render();
+        });
 }
 
 //-----------------------------------------------------------------------------

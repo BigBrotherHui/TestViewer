@@ -128,7 +128,6 @@ void DataNodeManager::transformDataNode(mitk::DataNode::Pointer pNode, vtkMatrix
     mitk::BaseGeometry::Pointer geo = data->GetGeometry();
     if (!geo) return;
     geo->SetIndexToWorldTransformByVtkMatrix(vmt);
-    std::cout << "transformDataNode success " << std::endl;
 }
 
 void DataNodeManager::transformDataNode(mitk::DataNode::Pointer pNode, Eigen::Matrix4d mt)
@@ -233,6 +232,26 @@ mitk::PointSet* DataNodeManager::castToLine(mitk::BaseData::Pointer data)
 {
     return dynamic_cast<mitk::PointSet*>(data.GetPointer());
 }
+
+void DataNodeManager::coverSurface(mitk::DataNode::Pointer node, vtkPolyData* vp)
+{
+    if (!node || !vp) {
+        Error e("node or vp is empty");
+        return;
+    }
+    castToSurface(node->GetData())->SetVtkPolyData(vp);
+}
+
+void DataNodeManager::coverImage(mitk::DataNode::Pointer node, vtkImageData* vimg)
+{
+    if (!node || !vimg) {
+        Error e("node or vp is empty");
+        return;
+    }
+    castToImage(node->GetData())->Initialize(vimg);
+    castToImage(node->GetData())->SetChannel(vimg->GetScalarPointer());
+}
+
 
 void DataNodeManager::EigenToVtkMatrix4x4(Eigen::Matrix4d mt, vtkMatrix4x4* vmt)
 {

@@ -52,6 +52,16 @@ namespace asclepios::gui
                 int getPickedSlice()
                 { return m_pickedSlice;
                 }
+                void setWallSpacing(double spacing)
+                { m_wallSpacing = spacing;
+                }
+                void setImageNumBack(int num)
+                { m_imageNumBack = num;
+                }
+                void setImageNumFront(int num)
+                { m_imageNumFront = num;
+                }
+                
                 int getInteractionMode() { return m_interactionMode; }
                 int getPickedSliceTupleValue() { return pickedSliceTupleValue;}
 	private:
