@@ -32,9 +32,17 @@ void LatticeWidget::setReslicersMatrix(vtkMatrix4x4* m_firstResliceMatrix,
     ui->widget_back->setResliceMatrix(m_thirdResliceMatrix);
 }
 
-void LatticeWidget::centerImageActors(std::array<std::array<double, 3>, 3> position)
+void LatticeWidget::centerImageActors(int index,std::array<std::array<double, 3>, 3> position)
 {
-    auto reslicer = ui->widget_mid->getImageResicer();
+    //back mid front represents axial coronal sagittal in order
+    //0 1 2 represents sagittal coronal axial
+    vtkSmartPointer<vtkImageResliceToColors> reslicer;
+    if (index==0)
+        reslicer= ui->widget_front->getImageResicer();
+    else if (index==1)
+        reslicer = ui->widget_mid->getImageResicer();
+    else
+        reslicer = ui->widget_back->getImageResicer();
     vtkSmartPointer<vtkMatrix4x4> matrixfront = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkSmartPointer<vtkMatrix4x4> matrixcenter = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkSmartPointer<vtkMatrix4x4> matrixback = vtkSmartPointer<vtkMatrix4x4>::New();

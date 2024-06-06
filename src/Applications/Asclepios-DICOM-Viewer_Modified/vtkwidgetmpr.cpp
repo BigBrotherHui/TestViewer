@@ -22,10 +22,11 @@ public:
         std::array<std::array<double, 3>, 3> position = *static_cast<std::array<std::array<double, 3>, 3> *>(callData);
         m_latticewidget->setResliceSpacing(m_resliceActor->getWallSpacing());
         m_latticewidget->setSlice(m_resliceActor->getImageNumFront(), m_resliceActor->getImageNumBack(),m_resliceActor->getPickedSlice(), m_resliceActor->getActorScale());
-        m_latticewidget->centerImageActors(position);
+        m_latticewidget->centerImageActors(index,position);
         m_latticewidget->Render();
     }
     LatticeWidget* m_latticewidget;
+	int index;
     vtkSmartPointer<asclepios::gui::vtkResliceActor> m_resliceActor;
 };
 
@@ -178,6 +179,20 @@ void asclepios::gui::vtkWidgetMPR::create3DMatrix() const
 	m_mprMaker->create3DMatrix();
 }
 
+void asclepios::gui::vtkWidgetMPR::updateWallCommand()
+{
+    int index = getActiveRenderWindowIndex(); 
+    auto command = m_resliceWidget->GetCommand(cursorFinishMovementTag);
+    if (!command) return;
+    auto callback = dynamic_cast<Callback*>(command);
+    if (!callback) return;
+	callback->index=index;
+    callback->m_resliceActor = static_cast<vtkResliceWidgetRepresentation*>(
+                                   m_resliceWidget->getReslicePlaneCursorWidget(index)->GetRepresentation())
+                                   ->getResliceActor();
+        m_resliceWidget->refreshWindows(-1);
+}
+
 //-----------------------------------------------------------------------------
 void asclepios::gui::vtkWidgetMPR::initializeWidget()
 {
@@ -216,7 +231,8 @@ void asclepios::gui::vtkWidgetMPR::createResliceWidget()
         callback->m_resliceActor = static_cast<vtkResliceWidgetRepresentation*>(
                                        m_resliceWidget->getReslicePlaneCursorWidget(2)->GetRepresentation())
                                        ->getResliceActor();
-        m_resliceWidget->AddObserver(cursorFinishMovement, callback);
+		callback->index=2;
+        cursorFinishMovementTag=m_resliceWidget->AddObserver(cursorFinishMovement, callback);
 }
 
 //-----------------------------------------------------------------------------

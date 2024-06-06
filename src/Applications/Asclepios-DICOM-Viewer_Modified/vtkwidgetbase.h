@@ -13,6 +13,9 @@ namespace asclepios::gui
 		//getters
 		[[nodiscard]] vtkSmartPointer<vtkRenderWindow>* getRenderWindows() { return m_renderWindows; }
 		[[nodiscard]] vtkRenderWindow* getActiveRenderWindow() const { return m_activeRenderWindow; }
+		int getActiveRenderWindowIndex(){
+			return m_activeRenderWindowIndex;
+		}
 		[[nodiscard]] core::Image* getImage() const { return m_image; }
 		[[nodiscard]] core::Series* getSeries() const { return m_series; }
 
@@ -30,6 +33,7 @@ namespace asclepios::gui
 	protected:
 		vtkSmartPointer<vtkRenderWindow> m_renderWindows[3] = {};
 		vtkRenderWindow* m_activeRenderWindow = nullptr;
+		int m_activeRenderWindowIndex{0};
 		core::Series* m_series = {};
 		core::Image* m_image = {};
 	};

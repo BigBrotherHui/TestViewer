@@ -21,7 +21,15 @@ namespace asclepios::gui
 
 		//setters
 		void setInteractor([[maybe_unused]] const vtkSmartPointer<vtkRenderWindowInteractor>& t_interactor) override {}
-		void setActiveRenderWindow(vtkRenderWindow* t_window) { m_activeRenderWindow = t_window; }
+		void setActiveRenderWindow(vtkRenderWindow* t_window) { 
+			m_activeRenderWindow = t_window; 
+			for(int i=0;i<3;++i){
+				if(m_activeRenderWindow==m_renderWindows[i]){
+					m_activeRenderWindowIndex=i;
+					break;
+				}
+			}
+		}
 		void setWindowLevel(const int& t_window, const int& t_level);
 		void setCameraCentered(const int& t_centered) const;
 		void setShowCursor(const bool& t_flag) const { m_resliceWidget->setVisible(t_flag); }
@@ -34,6 +42,7 @@ namespace asclepios::gui
                 vtkSmartPointer<vtkResliceWidget> getResliceWidget()
                 { return m_resliceWidget;
                 }
+                void updateWallCommand();
 	private:
 		vtkSmartPointer<vtkWidgetMPRCallback> m_callback = {};
 		vtkSmartPointer<vtkResliceWidget> m_resliceWidget = {};
@@ -46,5 +55,6 @@ namespace asclepios::gui
 		void createVTKkWidgetOverlay(vtkRenderWindow* t_window, int& t_windowNumber);
 		void refreshOverlayInCorner(vtkRenderWindow* t_window, int t_windowNumber, int t_corner);
 		[[nodiscard]] vtkAxisActor2D* createScaleActor(vtkRenderWindow* t_window);
+                int cursorFinishMovementTag;
 	};
 }

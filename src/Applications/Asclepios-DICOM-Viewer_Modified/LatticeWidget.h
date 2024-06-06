@@ -22,7 +22,7 @@ public:
     void setReslicersMatrix(vtkMatrix4x4* m_firstResliceMatrix,
         vtkMatrix4x4* m_secondResliceMatrix,
         vtkMatrix4x4* m_thirdResliceMatrix);
-    void centerImageActors(std::array<std::array<double, 3>, 3> position);
+    void centerImageActors(int index, std::array<std::array<double, 3>, 3> position);
     void Render();
     void setResliceSpacing(double slicespacing);
     void setSlice(int frontSliceNum,int backSliceNum,int pickedSlice,double scale);

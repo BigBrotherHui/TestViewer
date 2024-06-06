@@ -20,7 +20,9 @@
  	border: none;
 	background-color: transparent;
 }
-
+QLabel{
+color:white;
+}
 
 #buttonCOVID:hover, #buttonFlipHorizontal:hover,#buttonFlipVerical:hover, #buttonInvert:hover,
 #buttonRotateLeft:hover,#buttonRotateRight:hover, #buttonVolume:hover,#buttonMPR:hover,#buttonCloseAll:hover
@@ -423,7 +425,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QGridLayout" name="gridLayout"/>
      </widget>
      <widget class="QWidget" name="widgetPatients" native="true">
