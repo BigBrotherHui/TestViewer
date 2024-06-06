@@ -19,10 +19,15 @@ public:
     vtkTypeMacro(Callback, vtkCommand);
     void Execute(vtkObject* caller, unsigned long eventId, void* callData) override
     {
-        std::array<std::array<double, 3>, 3> position = *static_cast<std::array<std::array<double, 3>, 3> *>(callData);
         m_latticewidget->setResliceSpacing(m_resliceActor->getWallSpacing());
         m_latticewidget->setSlice(m_resliceActor->getImageNumFront(), m_resliceActor->getImageNumBack(),m_resliceActor->getPickedSlice(), m_resliceActor->getActorScale());
-        m_latticewidget->centerImageActors(index,position);
+		if(callData){
+			std::array<std::array<double, 3>, 3> position = *static_cast<std::array<std::array<double, 3>, 3> *>(callData);
+			m_latticewidget->centerImageActors(index,position);
+		}
+		else{
+			m_latticewidget->centerImageActors(index,std::array<std::array<double, 3>, 3>());
+		}
         m_latticewidget->Render();
     }
     LatticeWidget* m_latticewidget;

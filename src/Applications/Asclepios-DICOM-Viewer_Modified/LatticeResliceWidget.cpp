@@ -1,7 +1,49 @@
 #include "LatticeResliceWidget.h"
 #include <vtkImageResliceMapper.h>
 #include <vtkInteractorStyleImage.h>
-#include <vtkCamera.h>
+
+#include "utils.h"
+ class InteractorStyleImage : public vtkInteractorStyleImage {
+ public:
+     static InteractorStyleImage* New(){ 
+         InteractorStyleImage* style = new InteractorStyleImage;
+         return style;
+     }
+     vtkTypeMacro(InteractorStyleImage, vtkInteractorStyleImage);
+     InteractorStyleImage() = default;
+     ~InteractorStyleImage() = default;
+     void OnMouseWheelForward() override;
+     void OnMouseWheelBackward() override;
+ };
+
+ class LatticeResliceWidget_Callback : public vtkCommand {
+ public:
+     static LatticeResliceWidget_Callback* New() { return new LatticeResliceWidget_Callback; }
+     vtkTypeMacro(LatticeResliceWidget_Callback, vtkCommand);
+     void Execute(vtkObject* caller, unsigned long eventId, void* callData) override
+     { 
+         if (!m_latticeResliceWidget) return;
+         if (eventId == wallUp)
+         {
+             emit m_latticeResliceWidget->signal_wallChanged(true);
+         }
+         else if (eventId == wallDown) {
+             emit m_latticeResliceWidget->signal_wallChanged(false);
+         }
+     }
+     LatticeResliceWidget* m_latticeResliceWidget{nullptr};
+ };
+
+ void InteractorStyleImage::OnMouseWheelForward()
+ {
+     InvokeEvent(wallUp);
+ }
+
+ void InteractorStyleImage::OnMouseWheelBackward()
+ {
+     InvokeEvent(wallDown);
+ }
+
 LatticeResliceWidget::LatticeResliceWidget(QWidget *parent)
     : QVTKOpenGLNativeWidget(parent)
 {
@@ -11,7 +53,12 @@ LatticeResliceWidget::LatticeResliceWidget(QWidget *parent)
     m_renderwindow->AddRenderer(m_renderer);
     m_actor = vtkSmartPointer<vtkImageActor>::New();
     m_renderer->AddActor(m_actor);
-    interactor()->SetInteractorStyle(vtkSmartPointer<vtkInteractorStyleImage>::New());
+     auto style = vtkSmartPointer<InteractorStyleImage>::New();
+    auto callback = vtkSmartPointer<LatticeResliceWidget_Callback>::New();
+     callback->m_latticeResliceWidget = this;
+     style->AddObserver(wallUp,callback);
+     style->AddObserver(wallDown, callback);
+     interactor()->SetInteractorStyle(style);
 }
 
 LatticeResliceWidget::~LatticeResliceWidget()

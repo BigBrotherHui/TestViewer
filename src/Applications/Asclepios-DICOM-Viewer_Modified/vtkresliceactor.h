@@ -49,6 +49,8 @@ namespace asclepios::gui
                 double getActorScale()
                 { return actorScale;
                 }
+                void setPickedSlice(int slice);
+	
                 int getPickedSlice()
                 { return m_pickedSlice;
                 }

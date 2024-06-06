@@ -237,6 +237,12 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
     m_pickedSlice = pickedSlice;
 }
 
+void asclepios::gui::vtkResliceActor::setPickedSlice(int slice)
+{
+    if (slice < -m_imageNumBack || slice > m_imageNumFront) return;
+    m_pickedSlice = slice;
+}
+
 void asclepios::gui::vtkResliceActor::createActor()
 {
         m_appenderTranslate = vtkSmartPointer<vtkAppendPolyData>::New();

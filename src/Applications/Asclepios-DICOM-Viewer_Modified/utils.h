@@ -41,17 +41,18 @@ enum class overlayKey
 	level = 2625617
 };
 
-enum vtkCustomEvents : unsigned long
-{
-	changeScrollValue = vtkCommand::UserEvent + 1,
-	defaultCursor = changeScrollValue + 1,
-	cursorMove = defaultCursor + 1,
-	cursorFinishMovement = cursorMove + 1,
-	cursorRotate = cursorFinishMovement + 1,
-	imageChanged = cursorRotate + 1,
-	qualityLow = imageChanged + 1,
-	qualityHigh = qualityLow + 1,
-	reslice
+enum vtkCustomEvents : unsigned long {
+    changeScrollValue = vtkCommand::UserEvent + 1,
+    defaultCursor = changeScrollValue + 1,
+    cursorMove = defaultCursor + 1,
+    cursorFinishMovement = cursorMove + 1,
+    cursorRotate = cursorFinishMovement + 1,
+    imageChanged = cursorRotate + 1,
+    qualityLow = imageChanged + 1,
+    qualityHigh = qualityLow + 1,
+     wallUp=qualityHigh+1,
+     wallDown=wallUp+1,
+     reslice=wallDown+1
 };
 
 namespace asclepios::core

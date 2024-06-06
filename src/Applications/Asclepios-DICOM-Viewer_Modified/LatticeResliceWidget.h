@@ -17,6 +17,8 @@ public:
     void setResliceMatrix(vtkMatrix4x4 *vmt);
     void centerImageActor(std::array<double,3> position);
     const vtkSmartPointer<vtkImageResliceToColors> &getImageResicer();
+signals:
+    void signal_wallChanged(bool isUp);
 
 private:
     vtkSmartPointer<vtkImageResliceToColors> m_reslicer{nullptr};

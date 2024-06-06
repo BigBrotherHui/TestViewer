@@ -6,6 +6,7 @@
 #include "tabwidget.h"
 #include "globalsignal.h"
 #include "vtkreslicewidgetrepresentation.h"
+#include "LatticeWidget.h"
 
 asclepios::gui::WidgetMPR::WidgetMPR(QWidget* parent)
 	: WidgetBase(parent)
@@ -26,6 +27,23 @@ asclepios::gui::WidgetMPR::WidgetMPR(QWidget* parent)
                     actor->createWallRepresentation(0, 0, 0,0,actor->getPickedSlice());
 					m_widgetMPR->updateWallCommand();
                     m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->Render();
+        });
+        for (int i=0;i<3;++i)
+            connect(m_widgetMPR->getLatticeWidget()->getLatticeResliceWidget(i),
+                    &LatticeResliceWidget::signal_wallChanged, this,
+                    [&](bool isUp) { 
+			int index = m_widgetMPR->getActiveRenderWindowIndex();
+                        if (m_widgetMPR->getLatticeWidget()->getLatticeResliceWidget(index) != sender()) return;
+                        auto rep = dynamic_cast<vtkResliceWidgetRepresentation*>(
+                            m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->GetRepresentation());
+                        auto actor = rep->getResliceActor();
+                        if (isUp)
+                            actor->setPickedSlice(actor->getPickedSlice() + 1);
+                        else
+                            actor->setPickedSlice(actor->getPickedSlice() - 1);
+			actor->createWallRepresentation(0, 0, 0, 0, actor->getPickedSlice());
+                        m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->Render();
+                        m_widgetMPR->getResliceWidget()->InvokeEvent(cursorFinishMovement);
         });
 }
 

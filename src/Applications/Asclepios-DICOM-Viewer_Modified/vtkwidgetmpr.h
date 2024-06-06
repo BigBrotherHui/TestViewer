@@ -43,6 +43,9 @@ namespace asclepios::gui
                 { return m_resliceWidget;
                 }
                 void updateWallCommand();
+                LatticeWidget* getLatticeWidget()
+                { return m_latticewidget;
+                }
 	private:
 		vtkSmartPointer<vtkWidgetMPRCallback> m_callback = {};
 		vtkSmartPointer<vtkResliceWidget> m_resliceWidget = {};

@@ -102,3 +102,12 @@ void LatticeWidget::setSlice(int frontSliceNum, int backSliceNum, int pickedSlic
     m_pickedSlice = pickedSlice;
     m_scale = scale;
 }
+
+LatticeResliceWidget* LatticeWidget::getLatticeResliceWidget(int index)
+{
+    if (index == 0)
+        return ui->widget_front;
+    else if (index == 1)
+        return ui->widget_mid;
+    else return ui->widget_back;
+}

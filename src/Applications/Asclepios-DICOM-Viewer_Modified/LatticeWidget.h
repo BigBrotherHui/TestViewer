@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <vtkImageResliceToColors.h>
-
+#include "LatticeResliceWidget.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class LatticeWidget; }
 QT_END_NAMESPACE
@@ -26,6 +26,7 @@ public:
     void Render();
     void setResliceSpacing(double slicespacing);
     void setSlice(int frontSliceNum,int backSliceNum,int pickedSlice,double scale);
+    LatticeResliceWidget *getLatticeResliceWidget(int index);
 
 protected:
     void centerImageActors();
