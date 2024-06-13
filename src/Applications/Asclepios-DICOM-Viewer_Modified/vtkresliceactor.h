@@ -49,8 +49,11 @@ namespace asclepios::gui
                 double getActorScale()
                 { return actorScale;
                 }
+                int getSlabSliceCount()
+                { return m_slabSliceCount;
+                }
                 void setPickedSlice(int slice);
-	
+	        
                 int getPickedSlice()
                 { return m_pickedSlice;
                 }
@@ -62,6 +65,8 @@ namespace asclepios::gui
                 }
                 void setImageNumFront(int num)
                 { m_imageNumFront = num;
+                }
+                void setSlabSliceCount(int num) { m_slabSliceCount = num;
                 }
                 
                 int getInteractionMode() { return m_interactionMode; }
@@ -86,6 +91,7 @@ namespace asclepios::gui
                 int m_imageNumFront{10};
                 int m_imageNumBack{10};
                 double actorScale = 5;
+                int m_slabSliceCount{1};
                 vtkSmartPointer<vtkAssembly> m_actorText{nullptr};
                 double _colorWall[3]{0, 0.3 * 255, 0};
                 double _colorWallEdge[3]{0.6 * 255, 0, 0};

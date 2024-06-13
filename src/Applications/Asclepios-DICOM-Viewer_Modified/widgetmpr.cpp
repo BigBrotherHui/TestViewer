@@ -24,6 +24,7 @@ asclepios::gui::WidgetMPR::WidgetMPR(QWidget* parent)
                     actor->setImageNumFront(slicecount / 2);
                     actor->setImageNumBack(slicecount / 2);
                     actor->setWallSpacing(spacing);
+					actor->setSlabSliceCount(thickness);
                     actor->createWallRepresentation(0, 0, 0,0,actor->getPickedSlice());
 					m_widgetMPR->updateWallCommand();
                     m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->Render();
@@ -33,17 +34,55 @@ asclepios::gui::WidgetMPR::WidgetMPR(QWidget* parent)
                     &LatticeResliceWidget::signal_wallChanged, this,
                     [&](bool isUp) { 
 			int index = m_widgetMPR->getActiveRenderWindowIndex();
-                        if (m_widgetMPR->getLatticeWidget()->getLatticeResliceWidget(index) != sender()) return;
-                        auto rep = dynamic_cast<vtkResliceWidgetRepresentation*>(
-                            m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->GetRepresentation());
-                        auto actor = rep->getResliceActor();
-                        if (isUp)
-                            actor->setPickedSlice(actor->getPickedSlice() + 1);
-                        else
-                            actor->setPickedSlice(actor->getPickedSlice() - 1);
-			actor->createWallRepresentation(0, 0, 0, 0, actor->getPickedSlice());
-                        m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->Render();
-                        m_widgetMPR->getResliceWidget()->InvokeEvent(cursorFinishMovement);
+			 if (m_widgetMPR->getLatticeWidget()->getLatticeResliceWidget(0) == sender()) {
+                            auto rep = dynamic_cast<vtkResliceWidgetRepresentation*>(
+                                m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->GetRepresentation());
+                            auto actor = rep->getResliceActor();
+                            int frontImageNum = actor->getImageNumFront();
+                            if (isUp)
+                                frontImageNum += 1;
+                            else
+                                frontImageNum -= 1;
+                            actor->createWallRepresentation(
+                                0, -frontImageNum * actor->getActorScale() * actor->getWallSpacing(), 0, 12,
+                                actor->getPickedSlice());
+                            actor->setImageNumFront(frontImageNum);
+                            m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->Render();
+                            m_widgetMPR->getResliceWidget()->InvokeEvent(cursorFinishMovement);
+			 }
+                         else if (m_widgetMPR->getLatticeWidget()->getLatticeResliceWidget(1) == sender())
+                        {
+                             auto rep =
+                                 dynamic_cast<vtkResliceWidgetRepresentation*>(m_widgetMPR->getResliceWidget()
+                                                                                   ->getReslicePlaneCursorWidget(index)
+                                                                                   ->GetRepresentation());
+                             auto actor = rep->getResliceActor();
+                             if (isUp)
+                                 actor->setPickedSlice(actor->getPickedSlice() + 1);
+                             else
+                                 actor->setPickedSlice(actor->getPickedSlice() - 1);
+                             actor->createWallRepresentation(0, 0, 0, 0, actor->getPickedSlice());
+                             m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->Render();
+                             m_widgetMPR->getResliceWidget()->InvokeEvent(cursorFinishMovement);
+                        }
+                        else if (m_widgetMPR->getLatticeWidget()->getLatticeResliceWidget(2) == sender()) {
+                            auto rep =
+                                dynamic_cast<vtkResliceWidgetRepresentation*>(m_widgetMPR->getResliceWidget()
+                                                                                  ->getReslicePlaneCursorWidget(index)
+                                                                                  ->GetRepresentation());
+                            auto actor = rep->getResliceActor();
+                            int backImageNum = actor->getImageNumBack();
+                            if (isUp)
+                                backImageNum += 1;
+                            else
+                                backImageNum -= 1;
+                            actor->createWallRepresentation(
+                                0, backImageNum * actor->getActorScale() * actor->getWallSpacing(), 0, 11,
+                                actor->getPickedSlice());
+                            actor->setImageNumBack(backImageNum);
+                            m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->Render();
+                            m_widgetMPR->getResliceWidget()->InvokeEvent(cursorFinishMovement);
+                        }
         });
 }
 

@@ -17,6 +17,7 @@ public:
     void setResliceMatrix(vtkMatrix4x4 *vmt);
     void centerImageActor(std::array<double,3> position);
     const vtkSmartPointer<vtkImageResliceToColors> &getImageResicer();
+    void setSlabSliceCount(int slabSliceCount);
 signals:
     void signal_wallChanged(bool isUp);
 
@@ -25,5 +26,6 @@ private:
     vtkSmartPointer<vtkGenericOpenGLRenderWindow> m_renderwindow;
     vtkSmartPointer<vtkRenderer> m_renderer;
     vtkSmartPointer<vtkImageActor> m_actor;
+    int m_slabSliceCount{1};
 };
 #endif // LATTICERESLICEWIDGET_H

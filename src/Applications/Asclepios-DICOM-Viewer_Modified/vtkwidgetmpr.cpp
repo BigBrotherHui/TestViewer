@@ -20,7 +20,7 @@ public:
     void Execute(vtkObject* caller, unsigned long eventId, void* callData) override
     {
         m_latticewidget->setResliceSpacing(m_resliceActor->getWallSpacing());
-        m_latticewidget->setSlice(m_resliceActor->getImageNumFront(), m_resliceActor->getImageNumBack(),m_resliceActor->getPickedSlice(), m_resliceActor->getActorScale());
+        m_latticewidget->setSlice(m_resliceActor->getImageNumFront(), m_resliceActor->getImageNumBack(),m_resliceActor->getPickedSlice(), m_resliceActor->getActorScale(),m_resliceActor->getSlabSliceCount());
 		if(callData){
 			std::array<std::array<double, 3>, 3> position = *static_cast<std::array<std::array<double, 3>, 3> *>(callData);
 			m_latticewidget->centerImageActors(index,position);
@@ -187,15 +187,22 @@ void asclepios::gui::vtkWidgetMPR::create3DMatrix() const
 void asclepios::gui::vtkWidgetMPR::updateWallCommand()
 {
     int index = getActiveRenderWindowIndex(); 
+	int oldindex=index;
+	if(index==2){
+		index=1;
+	}
+	else if(index==1 || index==0){
+		index=2;
+	}
     auto command = m_resliceWidget->GetCommand(cursorFinishMovementTag);
     if (!command) return;
     auto callback = dynamic_cast<Callback*>(command);
     if (!callback) return;
 	callback->index=index;
     callback->m_resliceActor = static_cast<vtkResliceWidgetRepresentation*>(
-                                   m_resliceWidget->getReslicePlaneCursorWidget(index)->GetRepresentation())
+                                   m_resliceWidget->getReslicePlaneCursorWidget(oldindex)->GetRepresentation())
                                    ->getResliceActor();
-        m_resliceWidget->refreshWindows(-1);
+	m_resliceWidget->refreshWindows(-1);
 }
 
 //-----------------------------------------------------------------------------

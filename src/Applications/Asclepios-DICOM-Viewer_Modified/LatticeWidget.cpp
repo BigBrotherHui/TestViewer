@@ -55,7 +55,7 @@ void LatticeWidget::centerImageActors(int index,std::array<std::array<double, 3>
     double center[4];
     point[0] = 0;
     point[1] = 0;
-    point[2] = sliceSpacing * m_frontSliceNum*m_scale;
+    point[2] = -sliceSpacing * m_frontSliceNum*m_scale;
     point[3] = 1.0;
     matrixfront->MultiplyPoint(point, center);
     matrixfront->SetElement(0, 3, center[0]);
@@ -68,7 +68,7 @@ void LatticeWidget::centerImageActors(int index,std::array<std::array<double, 3>
     matrixcenter->SetElement(1, 3, center[1]);
     matrixcenter->SetElement(2, 3, center[2]);
 
-    point[2] = -sliceSpacing * m_backSliceNum*m_scale;
+    point[2] = sliceSpacing * m_backSliceNum*m_scale;
     matrixback->MultiplyPoint(point, center);
     matrixback->SetElement(0, 3, center[0]);
     matrixback->SetElement(1, 3, center[1]);
@@ -95,12 +95,16 @@ void LatticeWidget::setResliceSpacing(double slicespacing)
     m_sliceSpacing = slicespacing;
 }
 
-void LatticeWidget::setSlice(int frontSliceNum, int backSliceNum, int pickedSlice,double scale)
+void LatticeWidget::setSlice(int frontSliceNum, int backSliceNum, int pickedSlice,double scale,int slabSliceCount)
 {
     m_frontSliceNum = frontSliceNum;
     m_backSliceNum = backSliceNum;
     m_pickedSlice = pickedSlice;
     m_scale = scale;
+    m_slabSliceCount=slabSliceCount;
+    ui->widget_front->setSlabSliceCount(m_slabSliceCount);
+    ui->widget_mid->setSlabSliceCount(m_slabSliceCount);
+    ui->widget_back->setSlabSliceCount(m_slabSliceCount);
 }
 
 LatticeResliceWidget* LatticeWidget::getLatticeResliceWidget(int index)

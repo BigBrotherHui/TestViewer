@@ -83,7 +83,9 @@ void LatticeResliceWidget::setResliceMatrix(vtkMatrix4x4* vmt)
     reslicer->BypassOff();
     reslicer->SetInformationInput(m_reslicer->GetInformationInput());
     reslicer->SetOutputDimensionality(2);
-    reslicer->SetSlabNumberOfSlices(0);
+    reslicer->SetSlabNumberOfSlices(m_slabSliceCount);
+    if (m_slabSliceCount > 1)
+        reslicer->SetSlabModeToMax();
     reslicer->SetOutputFormatToRGB();
     reslicer->Update();
 
@@ -115,3 +117,6 @@ const vtkSmartPointer<vtkImageResliceToColors> &LatticeResliceWidget::getImageRe
     return m_reslicer;
 }
 
+void LatticeResliceWidget::setSlabSliceCount(int slabSliceCount){
+    m_slabSliceCount=slabSliceCount;
+}
