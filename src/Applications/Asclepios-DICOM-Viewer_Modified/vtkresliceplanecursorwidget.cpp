@@ -338,6 +338,16 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::moveMouse(vtkAbstractWidget* w
 		self->rotateCursor(newAngle - oldAngle);
 		double angle[1] = {vtkMath::DegreesFromRadians(newAngle - oldAngle)};
 		self->InvokeEvent(cursorRotate, angle);
+		
+					auto renderer =
+						self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+					vtkNew<vtkCoordinate> coordinate;
+					coordinate->SetCoordinateSystemToDisplay();
+					coordinate->SetValue(x, y);
+					double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
+					double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};
+					self->pickCurrentSlice(cd[0], cd[1], cd[2],255);
+			
 	    }
 	    break;
 	    case expand:{

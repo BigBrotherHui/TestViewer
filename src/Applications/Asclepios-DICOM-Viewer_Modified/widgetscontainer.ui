@@ -404,9 +404,16 @@ color:white;
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="buttonApplySettings">
+         <property name="text">
+          <string>应用设置</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="buttonSave">
          <property name="text">
-          <string>保存</string>
+          <string>保存图像</string>
          </property>
         </widget>
        </item>
