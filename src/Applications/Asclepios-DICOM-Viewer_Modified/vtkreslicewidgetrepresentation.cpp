@@ -277,7 +277,18 @@ void asclepios::gui::vtkResliceWidgetRepresentation::pickCurrentSlice(double x, 
     double roundedDistance =
         std::round(distance / getResliceActor()->getWallSpacing()) * getResliceActor()->getWallSpacing();
     int slice = (int)roundedDistance;
-    if (diff[1] < 0) slice = -slice;
+    double angle = fmod(m_rotationAngle,M_PI);
+    int quadrant = 0;
+    if (angle > -M_PI && angle < -M_PI / 2)
+        quadrant = 3;
+    else if (angle > -M_PI / 2 && angle < 0)
+        quadrant = 4;
+    else if (angle > 0 && angle < M_PI/2)
+        quadrant = 1;
+    else
+        quadrant = 2;
+    if (diff[1] < 0 && (quadrant == 4 || quadrant==1)) slice = -slice;
+    if (diff[1] > 1 && (quadrant == 2 || quadrant==3)) slice = -slice;
     getResliceActor()->createWallRepresentation(x, distance, z, moveAxes,slice);
 }
 
