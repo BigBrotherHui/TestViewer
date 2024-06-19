@@ -239,7 +239,7 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
 
 void asclepios::gui::vtkResliceActor::setPickedSlice(int slice)
 {
-    if (slice < -m_imageNumBack || slice > m_imageNumFront) return;
+    if (slice < -m_imageNumFront || slice > m_imageNumBack) return;
     m_pickedSlice = slice;
 }
 
