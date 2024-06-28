@@ -77,7 +77,7 @@ asclepios::gui::WidgetMPR::WidgetMPR(QWidget* parent)
                                 backImageNum += 1;
                             else
                                 backImageNum -= 1;
-    						if (backImageNum < 1) backImageNum = 1;
+    			    if (backImageNum < 1) backImageNum = 1;
                             actor->createWallRepresentation(
                                 0, backImageNum * actor->getActorScale() * actor->getWallSpacing(), 0, 11,
                                 actor->getPickedSlice());

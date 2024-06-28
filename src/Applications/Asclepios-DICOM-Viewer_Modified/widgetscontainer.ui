@@ -378,7 +378,11 @@ color:white;
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEdit_spacing"/>
+           <widget class="QLineEdit" name="lineEdit_spacing">
+            <property name="text">
+             <string>1</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
@@ -388,7 +392,11 @@ color:white;
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEdit_thickness"/>
+           <widget class="QLineEdit" name="lineEdit_thickness">
+            <property name="text">
+             <string>1</string>
+            </property>
+           </widget>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_3">
@@ -398,7 +406,11 @@ color:white;
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEdit_slicecount"/>
+           <widget class="QLineEdit" name="lineEdit_slicecount">
+            <property name="text">
+             <string>20</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
