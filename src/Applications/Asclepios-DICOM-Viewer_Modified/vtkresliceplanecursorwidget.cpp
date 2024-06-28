@@ -16,6 +16,7 @@
 #include <QApplication>
 #include <vtkPointData.h>
 #include <vtkCamera.h>
+#include <QDebug>
 vtkStandardNewMacro(asclepios::gui::vtkReslicePlaneCursorWidget);
 
 double asclepios::gui::vtkReslicePlaneCursorWidget::__lastCursorPos[3]{};
@@ -206,7 +207,7 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseDownAction(vtkAbstrac
 	{
 		self->InvokeEvent(vtkCommand::LeftButtonPressEvent, nullptr);
 	}
-	vtkNew<vtkCellPicker> picker;
+        vtkSmartPointer<vtkCellPicker> picker = vtkSmartPointer<vtkCellPicker>::New();
 	picker->SetTolerance(0.01);
 	picker->InitializePickList();
 	picker->PickFromListOn();
@@ -222,63 +223,70 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseDownAction(vtkAbstrac
 	}
 	if (picker->Pick(X, Y, 0, self->GetCurrentRenderer()))
 	{
-		if (self->m_state != bothTranslate)
+	    if (self->m_state != bothTranslate)
+	    {
+                if (picker->GetActor() == resliceActor->getActorTranslate())
 		{
-            if (picker->GetActor() == resliceActor->getActorTranslate())
-			{
-				auto id=picker->GetPointId();
-				int value=static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
-											->GetInput()
-											->GetPointData()
-											->GetScalars()
-											->GetTuple1(id);
-                                if (value == 0 || value == 1 ) {
-				    self->m_state = translate;
-				}
-				self->m_selectedAxis = value;
-			}
-			else if(picker->GetActor() == resliceActor->getActorRotate()){
-				self->m_state = rotate;
-			}
-                        else if (picker->GetActor() == resliceActor->getActorLattice()) {
-                            auto id = picker->GetPointId();
-                            int value = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
-                                            ->GetInput()
-                                            ->GetPointData()
-                                            ->GetScalars()
-                                            ->GetTuple1(id);
-                            if (self->WidgetRep->ComputeInteractionState(X, Y) == VTK_CURSOR_SIZEALL)
-                            {
-                                self->m_state = translate;
-                            }
-				else if(value==11 || value==12){//wall的前后2根线
-				    self->m_state=expand;
-				}
-				else if(value==resliceActor->getPickedSliceTupleValue()){
-					self->m_state=rotate;
-				}
-				else if(value==255){//wall的其它线
-					auto renderer =
-						self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
-					vtkNew<vtkCoordinate> coordinate;
-					coordinate->SetCoordinateSystemToDisplay();
-					coordinate->SetValue(X, Y);
-					double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
-					double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};
-					self->pickCurrentSlice(cd[0], cd[1], cd[2],value);
-				}
-				self->m_selectedAxis = value;
-			}
+		    auto id=picker->GetPointId();
+		    int value=static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
+									    ->GetInput()
+									    ->GetPointData()
+									    ->GetScalars()
+									    ->GetTuple1(id);
+                    if (value == 0 || value == 1 ) {
+			self->m_state = translate;
+		    }
+		    self->m_selectedAxis = value;
 		}
-		self->InvokeEvent(qualityLow, &self->m_plane);
-		self->GrabFocus(self->EventCallbackCommand);
-		self->InvokeEvent(vtkCommand::LeftButtonPressEvent, nullptr);
-		self->EventCallbackCommand->SetAbortFlag(1);
+		else if(picker->GetActor() == resliceActor->getActorRotate()){
+			self->m_state = rotate;
+		}
+                else if (picker->GetActor() == resliceActor->getActorLattice()) {
+                    auto id = picker->GetPointId();
+                    int value = static_cast<vtkPolyDataMapper*>(picker->GetActor()->GetMapper())
+                                    ->GetInput()
+                                    ->GetPointData()
+                                    ->GetScalars()
+                                    ->GetTuple1(id);
+                    if (self->WidgetRep->ComputeInteractionState(X, Y) == VTK_CURSOR_SIZEALL)
+                    {
+                        self->m_state = translate;
+                    }
+		    else if(value==11 || value==12){//wall的前后2根线
+		        self->m_state=expand;
+		    }
+		    else if(value==resliceActor->getPickedSliceTupleValue()){
+			    self->m_state=rotate;
+		    }
+		    else if(value==255){//wall的其它线
+			auto renderer =
+				self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+                        vtkSmartPointer<vtkCoordinate> coordinate = vtkSmartPointer<vtkCoordinate>::New();
+			coordinate->SetCoordinateSystemToDisplay();
+			coordinate->SetValue(X, Y);
+			double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
+			double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};
+			self->pickCurrentSlice(cd[0], cd[1], cd[2],value);
+		    }
+		    self->m_selectedAxis = value;
+		}
+	    }
+	    self->InvokeEvent(qualityLow, &self->m_plane);
+	    self->GrabFocus(self->EventCallbackCommand);
+	    self->InvokeEvent(vtkCommand::LeftButtonPressEvent, nullptr);
+	    self->EventCallbackCommand->SetAbortFlag(1);
 	}
 	else
 	{
-		self->GrabFocus(self->EventCallbackCommand);
-		self->InvokeEvent(vtkCommand::LeftButtonPressEvent, nullptr);
+            auto renderer = self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+            vtkSmartPointer<vtkCoordinate> coordinate = vtkSmartPointer<vtkCoordinate>::New();
+            coordinate->SetCoordinateSystemToDisplay();
+            coordinate->SetValue(X, Y);
+            double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
+            double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};
+            self->pickCurrentSlice(cd[0], cd[1], cd[2], 255);
+	    self->GrabFocus(self->EventCallbackCommand);
+	    self->InvokeEvent(vtkCommand::LeftButtonPressEvent, nullptr);
 	}
 	self->Render();
 }
@@ -339,14 +347,14 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::moveMouse(vtkAbstractWidget* w
 		double angle[1] = {vtkMath::DegreesFromRadians(newAngle - oldAngle)};
 		self->InvokeEvent(cursorRotate, angle);
 		
-					auto renderer =
-						self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
-					vtkNew<vtkCoordinate> coordinate;
-					coordinate->SetCoordinateSystemToDisplay();
-					coordinate->SetValue(x, y);
-					double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
-					double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};
-					self->pickCurrentSlice(cd[0], cd[1], cd[2],255);
+		// auto renderer =
+		// 	self->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+		// vtkNew<vtkCoordinate> coordinate;
+		// coordinate->SetCoordinateSystemToDisplay();
+		// coordinate->SetValue(x, y);
+		// double* worldCoordinate = coordinate->GetComputedWorldValue(renderer);
+		// double cd[3]{worldCoordinate[0], worldCoordinate[1], worldCoordinate[2]};
+		// self->pickCurrentSlice(cd[0], cd[1], cd[2],255);
 			
 	    }
 	    break;
@@ -370,15 +378,15 @@ void asclepios::gui::vtkReslicePlaneCursorWidget::moveMouse(vtkAbstractWidget* w
 //-----------------------------------------------------------------------------
 void asclepios::gui::vtkReslicePlaneCursorWidget::leftMouseUpAction(vtkAbstractWidget* w)
 {
-	vtkReslicePlaneCursorWidget* self = reinterpret_cast<vtkReslicePlaneCursorWidget*>(w);
-	self->SetCursor(0);
-	self->m_state = start;
-	self->ReleaseFocus();
-	self->InvokeEvent(qualityHigh, &self->m_plane);
-	self->InvokeEvent(vtkCommand::LeftButtonReleaseEvent, nullptr);
-	self->InvokeEvent(cursorFinishMovement, &self->m_plane);
-	self->EventCallbackCommand->SetAbortFlag(1);
-	self->Render();
+    vtkReslicePlaneCursorWidget* self = reinterpret_cast<vtkReslicePlaneCursorWidget*>(w);
+    self->SetCursor(0);
+    self->m_state = start;
+    self->ReleaseFocus();
+    self->InvokeEvent(qualityHigh, &self->m_plane);
+    self->InvokeEvent(vtkCommand::LeftButtonReleaseEvent, nullptr);
+    self->InvokeEvent(cursorFinishMovement, &self->m_plane);
+    self->EventCallbackCommand->SetAbortFlag(1);
+    self->Render();
 }
 
 //-----------------------------------------------------------------------------

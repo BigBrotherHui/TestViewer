@@ -34,7 +34,7 @@ namespace asclepios::gui
 
 		void initializeWidget();
 
-		enum widgetState { start = 0, rotate, translate,bothTranslate, thickness_horizontal, thickness_vertical,expand };
+		enum widgetState { start = 0,rotate, translate,bothTranslate, thickness_horizontal, thickness_vertical,expand };
 
 	protected:
 		int m_state = 0;
@@ -55,5 +55,7 @@ namespace asclepios::gui
                 void pickCurrentSlice(double x, double y, double z, unsigned char moveaxes);
 		friend class vtkReslicePlaneCursorCallback;
                 int m_selectedAxis{-1};
+	private:
+		bool isRotating{false};
 	};
 }
