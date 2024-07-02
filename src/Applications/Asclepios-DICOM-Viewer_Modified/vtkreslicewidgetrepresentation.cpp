@@ -274,8 +274,7 @@ void asclepios::gui::vtkResliceWidgetRepresentation::pickCurrentSlice(double x, 
     calculateTranslateY(diff[0], diff[1], m_rotationAngle);
     double distance = std::sqrt(diff[0] * diff[0] + diff[1] * diff[1]);
     distance = distance/getResliceActor()->getActorScale()/getResliceActor()->getWallSpacing();
-    double roundedDistance =
-        std::round(distance / getResliceActor()->getWallSpacing()) * getResliceActor()->getWallSpacing();
+    double roundedDistance =std::round(distance);
     int slice = (int)roundedDistance;
     double angle = fmod(m_rotationAngle, 2*M_PI);
     int quadrant = 0;

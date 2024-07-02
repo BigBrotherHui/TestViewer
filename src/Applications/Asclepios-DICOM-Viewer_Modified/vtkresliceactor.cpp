@@ -153,6 +153,8 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
         m_imageNumBack = y / actorScale / m_wallSpacing;
     else if (value == 12)
         m_imageNumFront = -y / actorScale / m_wallSpacing;
+    if (pickedSlice < -m_imageNumFront) pickedSlice = -m_imageNumFront;
+    if (pickedSlice > m_imageNumBack) pickedSlice = m_imageNumBack;
     vtkSmartPointer<vtkAppendPolyData> append1 = vtkSmartPointer<vtkAppendPolyData>::New();
     for (int i = 0; i < m_imageNumFront; i++) {
         double stepSize = m_wallSpacing * (-m_imageNumFront + i);
@@ -167,7 +169,7 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
     append1->Update();
     if (append1->GetOutput()) {
         AssignScalarValueTo(append1->GetOutput(), 255);
-        if (append1->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() > 2) {
+        if (append1->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() >= 2) {
             int slice = -pickedSlice;
             for (int i = 0; i < append1->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples(); ++i) {
                 if (i<2)
@@ -194,7 +196,7 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
     append2->Update();
     if (append2->GetOutput()) {
         AssignScalarValueTo(append2->GetOutput(), 255);
-        if (append2->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() > 2) {
+        if (append2->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() >= 2) {
             for (int i = 0; i < append2->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples();++i) {
                 if (i == append2->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() - 2 ||
                     i == append2->GetOutput()->GetPointData()->GetScalars()->GetNumberOfTuples() - 1)
@@ -209,7 +211,7 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
     if (pickedSlice == 0)
         AssignScalarValueTo(expandedSplineMid, pickedSliceTupleValue);
     else
-        AssignScalarValueTo(expandedSplineMid, 13);
+        AssignScalarValueTo(expandedSplineMid, 255);
     append = vtkSmartPointer<vtkAppendPolyData>::New();
     if (append1->GetOutput())
         append->AddInputData(append1->GetOutput());
