@@ -260,8 +260,12 @@ void asclepios::gui::vtkResliceWidgetRepresentation::expand(double x, double y, 
     diff[2] = z - getResliceActor()->getCenterPosition()[2];
     calculateTranslateY(diff[0], diff[1], m_rotationAngle);
     double distance = std::sqrt(diff[0] * diff[0] + diff[1] * diff[1]);
+	if(moveAxes==11 && diff[1]<0)
+		return;
+	if(moveAxes==12 && diff[1]>0)
+		return;
     if (moveAxes == 12) distance = -distance;
-    getResliceActor()->createWallRepresentation(x, distance, z, moveAxes);
+    getResliceActor()->createWallRepresentation(x, distance, z, moveAxes,getResliceActor()->getPickedSlice());
 }
 
 void asclepios::gui::vtkResliceWidgetRepresentation::pickCurrentSlice(double x, double y, double z,

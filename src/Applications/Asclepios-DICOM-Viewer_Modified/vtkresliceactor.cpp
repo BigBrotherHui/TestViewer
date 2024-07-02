@@ -118,7 +118,7 @@ vtkSmartPointer<vtkActor> createTextActor(const std::string &text,double *positi
 void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double y, double z, int value, int pickedSlice)
 {
     
-    if (pickedSlice > m_imageNumFront || pickedSlice < -m_imageNumBack) return;
+    if (pickedSlice > m_imageNumBack || pickedSlice < -m_imageNumFront) return;
     double* ori{nullptr};
     double* pos{nullptr};
     if (m_actorText) {
@@ -153,6 +153,8 @@ void asclepios::gui::vtkResliceActor::createWallRepresentation(double x, double 
         m_imageNumBack = y / actorScale / m_wallSpacing;
     else if (value == 12)
         m_imageNumFront = -y / actorScale / m_wallSpacing;
+    if(m_imageNumBack<1)m_imageNumBack=1;
+    if(m_imageNumFront<1)m_imageNumFront=1;
     if (pickedSlice < -m_imageNumFront) pickedSlice = -m_imageNumFront;
     if (pickedSlice > m_imageNumBack) pickedSlice = m_imageNumBack;
     vtkSmartPointer<vtkAppendPolyData> append1 = vtkSmartPointer<vtkAppendPolyData>::New();
