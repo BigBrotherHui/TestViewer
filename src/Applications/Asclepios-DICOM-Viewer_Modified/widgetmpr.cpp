@@ -17,13 +17,25 @@ asclepios::gui::WidgetMPR::WidgetMPR(QWidget* parent)
 	m_tabWidget = parent;
         connect(&GlobalSignal::instance(), &GlobalSignal::signal_sliceParamsChanged, this,
                 [&](int slicecount, int thickness, double spacing) {
+                    if (slicecount <= 0) return;
 					int index=m_widgetMPR->getActiveRenderWindowIndex();
                     auto rep=dynamic_cast<vtkResliceWidgetRepresentation*>(
                         m_widgetMPR->getResliceWidget()->getReslicePlaneCursorWidget(index)->GetRepresentation());
                     auto actor=rep->getResliceActor();
-                    actor->setImageNumFront(slicecount / 2);
-                    actor->setImageNumBack(slicecount / 2);
-                    actor->setWallSpacing(spacing);
+                    int frontSliceCount{0}, backSliceCount{0};
+                    if (slicecount % 2 == 0) {
+                        frontSliceCount = slicecount / 2;
+                        backSliceCount = slicecount / 2-1;
+                    }
+                    else
+                    {
+                        slicecount = slicecount - 1;
+                        frontSliceCount = slicecount / 2;
+                        backSliceCount = slicecount / 2;
+                    }
+                    actor->setImageNumFront(frontSliceCount);
+                    actor->setImageNumBack(backSliceCount);
+                    actor->setWallSpacing(spacing/actor->getActorScale());
 					actor->setSlabSliceCount(thickness);
                     actor->createWallRepresentation(0, 0, 0,0,actor->getPickedSlice());
 					m_widgetMPR->updateWallCommand();

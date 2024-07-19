@@ -55,7 +55,7 @@ void LatticeWidget::centerImageActors(int index,std::array<std::array<double, 3>
     double center[4];
     point[0] = 0;
     point[1] = 0;
-    point[2] = -sliceSpacing * m_frontSliceNum*m_scale;
+    point[2] = -sliceSpacing * m_backSliceNum*m_scale;
     point[3] = 1.0;
     matrixfront->MultiplyPoint(point, center);
     matrixfront->SetElement(0, 3, center[0]);
@@ -68,7 +68,7 @@ void LatticeWidget::centerImageActors(int index,std::array<std::array<double, 3>
     matrixcenter->SetElement(1, 3, center[1]);
     matrixcenter->SetElement(2, 3, center[2]);
 
-    point[2] = sliceSpacing * m_backSliceNum*m_scale;
+    point[2] = sliceSpacing * m_frontSliceNum*m_scale;
     matrixback->MultiplyPoint(point, center);
     matrixback->SetElement(0, 3, center[0]);
     matrixback->SetElement(1, 3, center[1]);

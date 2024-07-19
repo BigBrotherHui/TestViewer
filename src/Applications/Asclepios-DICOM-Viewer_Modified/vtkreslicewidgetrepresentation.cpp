@@ -259,12 +259,45 @@ void asclepios::gui::vtkResliceWidgetRepresentation::expand(double x, double y, 
     diff[1] = y - getResliceActor()->getCenterPosition()[1];
     diff[2] = z - getResliceActor()->getCenterPosition()[2];
     calculateTranslateY(diff[0], diff[1], m_rotationAngle);
+    double angle = fmod(m_rotationAngle, 2 * M_PI);
+    int quadrant = 0;
+    if (std::abs(angle) < 1e-3)
+        quadrant = 1;
+    else if (angle > -M_PI && angle < -0.5 * M_PI)
+        quadrant = 3;
+    else if ((angle > M_PI && angle < M_PI * 7 / 4) || (angle > -M_PI && angle < -M_PI / 2))
+        quadrant = 3;
+    else if ((angle > M_PI * 3. / 2 && angle < 2 * M_PI) || (angle < 0 && angle > -M_PI / 2))
+        quadrant = 4;
+    else if (angle > 0 && angle < M_PI / 2 || (angle > -2 * M_PI && angle < -3. / 2 * M_PI))
+        quadrant = 1;
+    else
+        quadrant = 2;
     double distance = std::sqrt(diff[0] * diff[0] + diff[1] * diff[1]);
-	if(moveAxes==11 && diff[1]<0)
-		return;
-	if(moveAxes==12 && diff[1]>0)
-		return;
-    if (moveAxes == 12) distance = -distance;
+    //qDebug() << "1111111angle:" << angle << "quadrant:" << quadrant << "diff[1]:" << diff[1];
+    if (quadrant == 1) {
+        if (diff[1] < 0 && moveAxes == 12)
+            distance = -distance;
+        else if (moveAxes == 11 && diff[1] < 0)
+            return;
+    }
+    if (quadrant == 2) {
+        if (diff[1]>0 && moveAxes==12)
+            distance = -distance;
+        else if (moveAxes == 11 && diff[1]>0)
+	    return;
+    }
+    else if (quadrant==3)
+    {
+        if (moveAxes == 12 && diff[1] > 0) distance = -distance;
+        else if (moveAxes == 11 && diff[1]>0)
+	    return;
+    }
+    else if (quadrant == 4) {
+        if (moveAxes == 12 && diff[1] < 0) distance = -distance;
+        if (moveAxes == 11 && diff[1]<0)
+	    return;
+    }
     getResliceActor()->createWallRepresentation(x, distance, z, moveAxes,getResliceActor()->getPickedSlice());
 }
 
@@ -282,15 +315,19 @@ void asclepios::gui::vtkResliceWidgetRepresentation::pickCurrentSlice(double x, 
     int slice = (int)roundedDistance;
     double angle = fmod(m_rotationAngle, 2*M_PI);
     int quadrant = 0;
-    if (std::abs(angle) < 1e-3) quadrant = 1;
-    else if ((angle > M_PI && angle < M_PI*7 / 4) || (angle>-M_PI&& angle<-M_PI/2))
+    if (std::abs(angle) < 1e-3)
+        quadrant = 1;
+    else if (angle > -M_PI && angle < -0.5*M_PI)
         quadrant = 3;
-    else if ((angle > M_PI * 7 / 4 && angle < 2*M_PI) || (angle<0 && angle>-M_PI/2))
+    else if ((angle > M_PI && angle < M_PI*3. / 2) || (angle>-M_PI&& angle<-M_PI/2))
+        quadrant = 3;
+    else if ((angle > M_PI * 7. / 4 && angle < 2*M_PI) || (angle<0 && angle>-M_PI/2))
         quadrant = 4;
-    else if (angle > 0 && angle < M_PI/2)
+    else if (angle > 0 && angle < M_PI / 2 || (angle > -2 * M_PI && angle < -3. / 2 * M_PI))
         quadrant = 1;
     else
         quadrant = 2;
+    //qDebug() << "22222222angle:" << angle << "quadrant:" << quadrant << "diff[1]:" << diff[1];
     if (diff[1] < 0 && (quadrant == 4 || quadrant==1)) slice = -slice;
     if (diff[1] > 0 && (quadrant == 2 || quadrant==3)) slice = -slice;
     getResliceActor()->createWallRepresentation(x, distance, z, moveAxes,slice);
