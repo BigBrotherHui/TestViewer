@@ -36,7 +36,7 @@ namespace asclepios::gui
 		void closePatients();
 		void createWidget3D();
 		void createWidgetMPR();
-		void sliceParams(int slicecount,int thickness,double spacing);
+		void sliceParams(int slicecount,double thickness,double spacing);
 	private slots:
 		void onApplyTransformation();
 		void onClosePatients();

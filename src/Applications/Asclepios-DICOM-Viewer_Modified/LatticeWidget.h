@@ -25,7 +25,7 @@ public:
     void centerImageActors(int index, std::array<std::array<double, 3>, 3> position);
     void Render();
     void setResliceSpacing(double slicespacing);
-    void setSlice(int frontSliceNum,int backSliceNum,int pickedSlice,double scale,int slabSliceCount);
+    void setSlice(int frontSliceNum,int backSliceNum,int pickedSlice,double scale,double slabSliceCount);
     LatticeResliceWidget *getLatticeResliceWidget(int index);
 
 protected:
@@ -38,6 +38,6 @@ private:
     int m_backSliceNum{10};
     int m_pickedSlice{0};
     double m_scale{5};
-    int m_slabSliceCount{1};
+    double m_slabSliceCount{1};
 };
 #endif // LATTICEWIDGET_H

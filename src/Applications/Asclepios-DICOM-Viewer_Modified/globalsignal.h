@@ -22,15 +22,15 @@ public:
     { return m_spacing;
     }
 public slots:
-    void slot_sliceParamsChanged(int slicecount, int thickness, double spacing);
+    void slot_sliceParamsChanged(int slicecount, double thickness, double spacing);
 signals:
-    void signal_sliceParamsChanged(int slicecount, int thickness, double spacing);
+    void signal_sliceParamsChanged(int slicecount, double thickness, double spacing);
 
 protected:
     GlobalSignal(QObject *parent=nullptr);
 private:
     int m_sliceCount;
-    int m_thickness;
+    double m_thickness;
     double m_spacing;
 };
 

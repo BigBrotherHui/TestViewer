@@ -74,6 +74,9 @@ void LatticeWidget::centerImageActors(int index,std::array<std::array<double, 3>
     matrixback->SetElement(1, 3, center[1]);
     matrixback->SetElement(2, 3, center[2]);
 
+    ui->widget_front->setSpacing(sliceSpacing);
+    ui->widget_mid->setSpacing(sliceSpacing);
+    ui->widget_back->setSpacing(sliceSpacing);
     ui->widget_front->setResliceMatrix(matrixfront);
     ui->widget_mid->setResliceMatrix(matrixcenter);
     ui->widget_back->setResliceMatrix(matrixback);
@@ -95,7 +98,7 @@ void LatticeWidget::setResliceSpacing(double slicespacing)
     m_sliceSpacing = slicespacing;
 }
 
-void LatticeWidget::setSlice(int frontSliceNum, int backSliceNum, int pickedSlice,double scale,int slabSliceCount)
+void LatticeWidget::setSlice(int frontSliceNum, int backSliceNum, int pickedSlice,double scale,double slabSliceCount)
 {
     m_frontSliceNum = frontSliceNum;
     m_backSliceNum = backSliceNum;
@@ -110,8 +113,8 @@ void LatticeWidget::setSlice(int frontSliceNum, int backSliceNum, int pickedSlic
 LatticeResliceWidget* LatticeWidget::getLatticeResliceWidget(int index)
 {
     if (index == 0)
-        return ui->widget_front;
+        return ui->widget_back;
     else if (index == 1)
         return ui->widget_mid;
-    else return ui->widget_back;
+    else return ui->widget_front;
 }

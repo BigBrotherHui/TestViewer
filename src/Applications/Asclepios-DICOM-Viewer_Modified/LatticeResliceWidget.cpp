@@ -3,7 +3,13 @@
 #include <vtkInteractorStyleImage.h>
 
 #include "utils.h"
- class InteractorStyleImage : public vtkInteractorStyleImage {
+#include <vtkImageData.h>
+#include <vtkImageSlabReslice.h>
+#include <vtkLookupTable.h>
+#include <vtkImageMapToColors.h>
+#include <vtkImageProperty.h>
+#include <QDebug>
+class InteractorStyleImage : public vtkInteractorStyleImage {
  public:
      static InteractorStyleImage* New(){ 
          InteractorStyleImage* style = new InteractorStyleImage;
@@ -51,7 +57,11 @@ LatticeResliceWidget::LatticeResliceWidget(QWidget *parent)
     setRenderWindow(m_renderwindow);
     m_renderer = vtkSmartPointer<vtkRenderer>::New();
     m_renderwindow->AddRenderer(m_renderer);
-    m_actor = vtkSmartPointer<vtkImageActor>::New();
+    m_actor = vtkSmartPointer<vtkImageSlice>::New();
+    m_actor->SetMapper(vtkSmartPointer<vtkImageResliceMapper>::New());
+    vtkSmartPointer<vtkImageProperty> property = vtkSmartPointer<vtkImageProperty>::New();
+    property->SetInterpolationTypeToNearest();
+    m_actor->SetProperty(property);
     m_renderer->AddActor(m_actor);
      auto style = vtkSmartPointer<InteractorStyleImage>::New();
     auto callback = vtkSmartPointer<LatticeResliceWidget_Callback>::New();
@@ -76,21 +86,27 @@ void LatticeResliceWidget::setResliceMatrix(vtkMatrix4x4* vmt)
 {
     if (!m_reslicer)
        return;
-    vtkSmartPointer<vtkImageResliceToColors> reslicer = vtkSmartPointer<vtkImageResliceToColors>::New();
+    vtkSmartPointer<vtkImageSlabReslice> reslicer = vtkSmartPointer<vtkImageSlabReslice>::New();
     reslicer->SetInputData(m_reslicer->GetInput());
-    reslicer->SetLookupTable(m_reslicer->GetLookupTable());
     reslicer->SetResliceAxes(vmt);
-    reslicer->BypassOff();
     reslicer->SetInformationInput(m_reslicer->GetInformationInput());
     reslicer->SetOutputDimensionality(2);
-    reslicer->SetSlabNumberOfSlices(m_slabSliceCount);
-    if (m_slabSliceCount > 1)
-        reslicer->SetSlabModeToMax();
-    reslicer->SetOutputFormatToRGB();
+    reslicer->SetSlabResolution(0.1);
+    reslicer->SetSlabModeToMean();
+    reslicer->SetSlabThickness(m_slabSliceCount);
     reslicer->Update();
-
-    m_actor->SetInputData(reslicer->GetOutput());
-
+    vtkSmartPointer<vtkImageMapToColors> map = vtkSmartPointer<vtkImageMapToColors>::New();
+    map->SetInputData(reslicer->GetOutput());
+    map->SetLookupTable(m_reslicer->GetLookupTable());
+    map->SetOutputFormatToRGB();
+    map->Update();
+    m_actor->GetMapper()->SetInputData(map->GetOutput());
+    if (m_slabSliceCount > 0) {
+        static_cast<vtkImageResliceMapper*>(m_actor->GetMapper())->ResampleToScreenPixelsOff();
+    }
+    else {
+        static_cast<vtkImageResliceMapper*>(m_actor->GetMapper())->ResampleToScreenPixelsOn();
+    }
     m_renderer->ResetCamera();
     m_renderwindow->Render();
 }
@@ -117,6 +133,11 @@ const vtkSmartPointer<vtkImageResliceToColors> &LatticeResliceWidget::getImageRe
     return m_reslicer;
 }
 
-void LatticeResliceWidget::setSlabSliceCount(int slabSliceCount){
+void LatticeResliceWidget::setSlabSliceCount(double slabSliceCount){
     m_slabSliceCount=slabSliceCount;
+}
+
+void LatticeResliceWidget::setSpacing(double spacing)
+{
+    m_spacing = spacing;
 }
