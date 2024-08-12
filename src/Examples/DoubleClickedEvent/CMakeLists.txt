@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT(ProbeImage)
+PROJECT(DoubleClickedEvent)
 
 FIND_PACKAGE(VTK REQUIRED)
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets Core)
