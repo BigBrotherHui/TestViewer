@@ -4,8 +4,8 @@ PROJECT(ProbeImage)
 
 FIND_PACKAGE(VTK REQUIRED)
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets Core)
-ADD_EXECUTABLE(${PROJECT_NAME} probeimage.cxx vtksplinewidget.h vtksplinewidget.cpp splineWidget.h splineWidget.cpp
-splineRepresentation.h splineRepresentation.cpp
+ADD_EXECUTABLE(${PROJECT_NAME} probeimage.cxx transformWidget.h transformWidget.cpp
+vtkAddonMathUtilities.h vtkAddonMathUtilities.cxx vtkMessageCollection.h vtkMessageCollection.cxx
 )
 set(target_directory "Examples")
 #设置后期生成事件
