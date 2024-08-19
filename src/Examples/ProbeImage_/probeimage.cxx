@@ -16,8 +16,8 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
-#include "transformWidget.h"
 #include <vtkDICOMImageReader.h>
+#include "splineWidget.h"
 VTK_MODULE_INIT(vtkInteractionStyle)
 VTK_MODULE_INIT(vtkRenderingFreeType)
 VTK_MODULE_INIT(vtkRenderingOpenGL2)
@@ -26,7 +26,6 @@ VTK_MODULE_INIT(vtkRenderingVolumeOpenGL2)
 
 int main()
 {
-
     vtkSmartPointer<vtkDICOMImageReader> reader = vtkSmartPointer<vtkDICOMImageReader>::New();
     reader->SetFileName("D:/Images/dicom_image/CT0013.dcm");
     reader->Update();
@@ -50,24 +49,15 @@ int main()
 
     vtkSmartPointer<vtkInteractorStyleImage> style = vtkSmartPointer<vtkInteractorStyleImage>::New();
     rwi->SetInteractorStyle(style);
-    /****************************************************************/
 
-    // vtkDistanceWidget
+    vtkSmartPointer<splineWidget> distanceWidget = vtkSmartPointer<splineWidget>::New();
+    distanceWidget->CreateDefaultRepresentation();
+    distanceWidget->SetInteractor(rwi);
+    distanceWidget->On();
 
-        //实例化Widget
-    vtkSmartPointer<transformWidget> distanceWidget = vtkSmartPointer<transformWidget>::New();
-        //指定渲染窗口交互器,来监听用户事件
-        distanceWidget->SetInteractor(rwi);
-        //必要时使用观察者/命令模式创建回调函数(此处没用)
-        //创建几何表达实体。用SetRepresentation()把事件与Widget关联起来
-        //或者使用Widget默认的几何表达实体
-        //distanceWidget->CreateDefaultRepresentation();
-        //激活Widget
-        distanceWidget->On();
-
-        rw->Render();
-        rwi->Initialize();
-        rwi->Start();
+    rw->Render();
+    rwi->Initialize();
+    rwi->Start();
 
     return 0;
 }
