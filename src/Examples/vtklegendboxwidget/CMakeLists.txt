@@ -4,7 +4,8 @@ PROJECT(vtklegendboxwidget)
 
 FIND_PACKAGE(VTK REQUIRED)
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets Core)
-ADD_EXECUTABLE(${PROJECT_NAME} probeimage.cxx vtklegendboxwidget.h vtklegendboxwidget.cpp vtklegendboxrepresentation.h vtklegendboxrepresentation.cpp
+tidyFolder()
+ADD_EXECUTABLE(${PROJECT_NAME} ${PROJECT_SOURCES}
 )
 set(target_directory "Examples")
 #设置后期生成事件
